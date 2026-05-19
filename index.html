@@ -927,7 +927,7 @@ async function doFetch(manual = false) {
   btn.classList.add('spinning');
 
   try {
-    // 1. Fetch XAU/USD từ gold-api.com
+    // 1. Fetch XAU/USD từ gold-api.com (LUÔN gọi - không giới hạn)
     const resXau = await fetch('https://api.gold-api.com/price/XAU', {
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json' }
@@ -942,8 +942,9 @@ async function doFetch(manual = false) {
     const chg  = price - prev;
     const pct  = prev ? (chg / prev) * 100 : 0;
 
-    // 2. Fetch tỷ giá USD/VNĐ từ ExchangeRate-API (AYR Tech)
-    if (isAutoRate()) {
+    // 2. Fetch tỷ giá USD/VNĐ từ ExchangeRate-API (CHỈ mỗi 1 giờ để tiết kiệm quota)
+    const now = Date.now();
+    if (isAutoRate() && (manual || now - lastRateUpdate > 3600000)) {
       try {
         const resRate = await fetch('https://v6.exchangerate-api.com/v6/7fb247fb0bb8868da2b84f32/latest/USD', {
           cache: 'no-store'
@@ -958,6 +959,7 @@ async function doFetch(manual = false) {
             
             if (newRate > 20000 && newRate < 35000) {
               document.getElementById('iRate').value = newRate;
+              lastRateUpdate = now;
               console.log('✓ Cập nhật tỷ giá từ ExchangeRate-API:', newRate);
             }
           }
@@ -970,9 +972,7 @@ async function doFetch(manual = false) {
     // 3. Premium SJC: dùng logic estimation dựa trên thị trường
     if (isAutoPrem()) {
       try {
-        // Tạm thời: duy trì giá trị hiện tại hoặc set default = 10%
         let premValue = +document.getElementById('iPremSJC').value || 10;
-        // Có thể thêm logic: nếu giá tăng > 5% → premium giảm, giá giảm → premium tăng
         if (pct > 3) premValue = Math.max(8, premValue - 1);
         if (pct < -3) premValue = Math.min(15, premValue + 1);
         document.getElementById('iPremSJC').value = Math.round(premValue);
@@ -988,9 +988,9 @@ async function doFetch(manual = false) {
     badge.className = 'live-badge live';
     liveT.textContent = 'Live · gold-api.com + ExchangeRate-API';
 
-    const now = new Date();
+    const dt = new Date();
     document.getElementById('tsUpdate').textContent =
-      'Cập nhật lúc ' + now.toLocaleTimeString('vi-VN') + ' ngày ' + now.toLocaleDateString('vi-VN');
+      'Cập nhật lúc ' + dt.toLocaleTimeString('vi-VN') + ' ngày ' + dt.toLocaleDateString('vi-VN');
 
   } catch (err) {
     badge.className = 'live-badge error';
