@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test ExchangeRate-API</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0a0e17;
+      color: #fff;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    pre {
+      background: #131820;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid #2a3142;
+    }
+    button {
+      background: #f5c842;
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    button:hover {
+      background: #ffd966;
+    }
+    .error {
+      color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.1);
+      padding: 12px;
+      border-left: 3px solid #ff6b6b;
+    }
+    .success {
+      color: #34d399;
+      background: rgba(52, 211, 153, 0.1);
+      padding: 12px;
+      border-left: 3px solid #34d399;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔍 Test ExchangeRate-API</h2>
+
+<button onclick="testAPI()">Test ExchangeRate-API</button>
+<button onclick="testGoldAPI()">Test Gold-API</button>
+
+<h3>Response:</h3>
+<pre id="output">Chưa test...</pre>
+
+<script>
+async function testAPI() {
+  const output = document.getElementById('output');
+  output.innerHTML = '⏳ Đang fetch...';
+  
+  try {
+    const API_KEY = '7fb247fb0bb8868da2b84f32';
+    const res = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`, {
+      cache: 'no-store'
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    const data = await res.json();
+    
+    output.innerHTML = `<span class="success">✓ Thành công</span>
+
+JSON Response:
+${JSON.stringify(data, null, 2)}
+
+VND Rate: ${data.conversion_rates?.VND}
+Type: ${typeof data.conversion_rates?.VND}
+
+Kiểm tra:
+- Giá trị: ${data.conversion_rates?.VND}
+- < 1000? ${data.conversion_rates?.VND < 1000}
+- Sau khi × 1000: ${data.conversion_rates?.VND * 1000}
+- Sau khi round: ${Math.round(data.conversion_rates?.VND * 1000)}
+`;
+  } catch (err) {
+    output.innerHTML = `<span class="error">✗ Lỗi: ${err.message}</span>`;
+  }
+}
+
+async function testGoldAPI() {
+  const output = document.getElementById('output');
+  output.innerHTML = '⏳ Đang fetch...';
+  
+  try {
+    const res = await fetch('https://api.gold-api.com/price/XAU', {
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    const data = await res.json();
+    
+    output.innerHTML = `<span class="success">✓ Thành công</span>
+
+JSON Response:
+${JSON.stringify(data, null, 2)}
+
+Price: ${data.price || data.ask || data.bid}
+`;
+  } catch (err) {
+    output.innerHTML = `<span class="error">✗ Lỗi: ${err.message}</span>`;
+  }
+}
+</script>
+
+</body>
+</html>

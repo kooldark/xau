@@ -683,13 +683,16 @@ td { padding:18px 22px; vertical-align:middle; }
       <input type="checkbox" id="chkAutoPrem" checked onchange="recalc()" title="Tự động điều chỉnh theo thị trường">
     </div>
     <div class="set-group">
-      <label>Tự cập nhật</label>
+      <label>Tự cập nhật XAU/USD</label>
       <select id="iInterval" onchange="setTimer()">
         <option value="30">30 giây</option>
         <option value="60" selected>1 phút</option>
         <option value="300">5 phút</option>
         <option value="0">Tắt</option>
       </select>
+    </div>
+    <div class="set-note" style="font-size:12px; color:var(--muted); font-weight:600; align-self:flex-start; padding:0; margin-top:-8px;">
+      <span style="color:var(--gold);">💡 USD/VNĐ cập nhật mỗi 1 giờ (tiết kiệm API quota)</span>
     </div>
   </div>
 
@@ -740,7 +743,7 @@ td { padding:18px 22px; vertical-align:middle; }
 
   <div class="footer-bar">
     <span class="ts" id="tsUpdate">—</span>
-    <span class="ts" id="tsSource">Nguồn: gold-api.com (XAU/USD) + exchangerate.host (USD/VNĐ)</span>
+    <span class="ts" id="tsSource">Nguồn: gold-api.com (XAU/USD) + ExchangeRate-API (USD/VNĐ) by AYR Tech</span>
   </div>
 
   <div class="accordion">
@@ -783,7 +786,8 @@ const TYPES = [
   { key:'10k',    name:'Vàng 10K (417)',     sub:'Nhẫn, phụ kiện giá thấp',               pur:4167, f:.4167,  premium:'none', filter:'jewelry' },
 ];
 
-let xauUSD = null, autoTimer = null, countdown = 0, cTimer = null, currentFilter = 'all';
+let xauUSD = null, autoTimer = null, rateTimer = null, countdown = 0, cTimer = null, currentFilter = 'all';
+let lastRateUpdate = 0;
 
 // ── Format helpers ──
 const vi = n => Math.round(n).toLocaleString('vi-VN');
@@ -913,7 +917,7 @@ function renderTable(xau) {
   });
 }
 
-// ── Fetch từ Multiple APIs — tự động cập nhật tỷ giá & premium ──
+// ── Fetch từ Multiple APIs — tự động cập nhật tỷ giá (mỗi giờ = 24 lần/ngày, tiết kiệm API quota 1500/tháng) ──
 async function doFetch(manual = false) {
   const btn  = document.getElementById('btnRefresh');
   const badge = document.getElementById('liveBadge');
@@ -938,17 +942,24 @@ async function doFetch(manual = false) {
     const chg  = price - prev;
     const pct  = prev ? (chg / prev) * 100 : 0;
 
-    // 2. Fetch tỷ giá USD/VNĐ từ exchangerate.host
+    // 2. Fetch tỷ giá USD/VNĐ từ ExchangeRate-API (AYR Tech)
     if (isAutoRate()) {
       try {
-        const resRate = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=VND', {
+        const resRate = await fetch('https://v6.exchangerate-api.com/v6/7fb247fb0bb8868da2b84f32/latest/USD', {
           cache: 'no-store'
         });
         if (resRate.ok) {
           const dRate = await resRate.json();
-          const newRate = Math.round(dRate.rates?.VND);
-          if (newRate && newRate > 20000 && newRate < 35000) {
-            document.getElementById('iRate').value = newRate;
+          let newRate = dRate.conversion_rates?.VND;
+          if (newRate) {
+            // Handle both decimal (26.256) and integer formats
+            if (newRate < 1000) newRate = Math.round(newRate * 1000);
+            else newRate = Math.round(newRate);
+            
+            if (newRate > 20000 && newRate < 35000) {
+              document.getElementById('iRate').value = newRate;
+              console.log('✓ Cập nhật tỷ giá từ ExchangeRate-API:', newRate);
+            }
           }
         }
       } catch (e) {
@@ -975,7 +986,7 @@ async function doFetch(manual = false) {
     renderTable(price);
 
     badge.className = 'live-badge live';
-    liveT.textContent = 'Live · gold-api.com + exchangerate.host';
+    liveT.textContent = 'Live · gold-api.com + ExchangeRate-API';
 
     const now = new Date();
     document.getElementById('tsUpdate').textContent =
