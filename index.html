@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bảng Giá Vàng Việt Nam</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --bg:       #0d0f14;
+  --card:     #14171f;
+  --card2:    #1a1e28;
+  --border:   #252b38;
+  --gold:     #d4a843;
+  --gold-lt:  #f5c842;
+  --gold-dim: #7a6020;
+  --green:    #34d399;
+  --red:      #f87171;
+  --text:     #f0f0f0;
+  --muted:    #6b7280;
+  --radius:   14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* subtle dot grid bg */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: radial-gradient(rgba(212,168,67,.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events:none; z-index:0;
+}
+
+.page { position:relative; z-index:1; max-width:960px; margin:0 auto; padding:24px 16px 60px; }
+
+/* ── HEADER ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:20px; flex-wrap:wrap; gap:14px;
+}
+
+.logo {
+  display:flex; align-items:center; gap:12px;
+}
+.logo-icon {
+  width:48px; height:48px;
+  background: linear-gradient(145deg,#8a6020,#d4a843);
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; font-weight:900; color:#0d0f14;
+  flex-shrink:0;
+}
+.logo-text h1 { font-size:22px; font-weight:900; color:var(--gold-lt); line-height:1.2; }
+.logo-text p  { font-size:13px; color:var(--muted); margin-top:2px; }
+
+.header-right { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+.live-badge {
+  display:flex; align-items:center; gap:6px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:6px 14px;
+  font-size:14px; font-weight:700; color:var(--muted);
+  transition:color .3s; min-height:44px;
+  -webkit-user-select:none; user-select:none;
+}
+.live-badge.live { color:var(--green); border-color:rgba(52,211,153,.3); }
+.live-badge.error { color:var(--red); border-color:rgba(248,113,113,.3); }
+
+.dot {
+  width:9px; height:9px; border-radius:50%;
+  background:var(--muted); flex-shrink:0; transition:background .3s;
+}
+.live .dot { background:var(--green); animation:blink 1.8s ease-in-out infinite; }
+.error .dot { background:var(--red); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.btn-refresh {
+  display:flex; align-items:center; gap:7px;
+  background:var(--card2); border:1px solid var(--border);
+  color:var(--gold); font-family:inherit; font-size:15px; font-weight:700;
+  padding:9px 18px; border-radius:10px; cursor:pointer; transition:all .2s;
+  min-height:44px; min-width:44px; justify-content:center;
+  touch-action:manipulation; -webkit-user-select:none; user-select:none;
+}
+.btn-refresh:hover:not(:disabled) { border-color:var(--gold-dim); background:#1f2535; }
+.btn-refresh:disabled { opacity:.4; cursor:not-allowed; }
+.btn-refresh svg { width:16px; height:16px; }
+.spinning svg { animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── WORLD STRIP ── */
+.world-strip {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap:10px; margin-bottom:16px;
+}
+
+.world-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px 18px;
+}
+.world-card .lbl {
+  font-size:12px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.07em; margin-bottom:6px;
+}
+.world-card .val {
+  font-size:24px; font-weight:900; color:var(--gold-lt);
+  line-height:1; white-space:nowrap;
+}
+.world-card .sub {
+  font-size:13px; font-weight:600; margin-top:4px;
+}
+.up   { color:var(--green); }
+.down { color:var(--red); }
+.dim  { color:var(--muted); }
+
+/* ── SETTINGS ── */
+.settings {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px 20px;
+  margin-bottom:16px;
+  display:flex; flex-wrap:wrap; gap:20px; align-items:center;
+}
+
+.set-group { display:flex; flex-direction:column; gap:5px; }
+.set-group label { font-size:13px; font-weight:700; color:var(--muted); }
+.set-group input, .set-group select {
+  background:var(--card2); border:1px solid var(--border);
+  color:var(--text); font-family:inherit; font-size:16px; font-weight:700;
+  padding:8px 12px; border-radius:9px; outline:none; min-width:110px;
+  min-height:44px; transition:border-color .2s;
+  -webkit-appearance:none; appearance:none;
+}
+
+.set-group input[type="checkbox"] {
+  width:44px; height:44px; cursor:pointer; accent-color:var(--gold);
+  padding:0; min-width:auto; min-height:auto;
+  appearance:auto; -webkit-appearance:auto;
+}
+.set-group input:focus, .set-group select:focus { border-color:var(--gold-dim); }
+
+.set-note {
+  font-size:12px; color:var(--muted); font-weight:600;
+  align-self:flex-end; padding-bottom:2px;
+}
+
+/* ── TABLE ── */
+.table-wrap {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+}
+
+table { width:100%; border-collapse:collapse; }
+
+/* section header rows */
+.tr-section td {
+  background:rgba(212,168,67,.07);
+  color:var(--gold-dim);
+  font-size:12px; font-weight:900;
+  text-transform:uppercase; letter-spacing:.12em;
+  padding:9px 20px;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+
+thead th {
+  background:var(--card2);
+  font-size:12px; font-weight:800; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.07em;
+  padding:13px 20px; text-align:left;
+  border-bottom:1px solid var(--border);
+}
+thead th:not(:first-child) { text-align:right; }
+
+tbody tr { border-bottom:1px solid var(--border); transition:background .12s; cursor:pointer; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover:not(.tr-section) { background:#1c2130; }
+tbody tr:active:not(.tr-section) { background:#1f2535; }
+
+td { padding:16px 20px; vertical-align:middle; }
+
+/* name column */
+.td-name .n  { font-size:18px; font-weight:800; color:var(--text); line-height:1.2; }
+.td-name .s  { font-size:13px; font-weight:600; color:var(--muted); margin-top:3px; }
+.badge {
+  display:inline-block;
+  background:rgba(212,168,67,.13); color:var(--gold);
+  border:1px solid rgba(212,168,67,.25);
+  font-size:11px; font-weight:800;
+  padding:1px 7px; border-radius:4px;
+  margin-left:7px; vertical-align:middle; white-space:nowrap;
+}
+
+/* number columns */
+.td-r { text-align:right; }
+.big   { font-size:20px; font-weight:900; color:var(--gold-lt); }
+.med   { font-size:17px; font-weight:800; color:var(--text); }
+.sm    { font-size:14px; font-weight:700; color:var(--muted); }
+
+/* premium badge */
+.prem {
+  display:inline-block; border-radius:6px;
+  font-size:13px; font-weight:800; padding:3px 9px;
+}
+.prem-ok  { background:rgba(52,211,153,.12); color:var(--green); }
+.prem-med { background:rgba(212,168,67,.12); color:var(--gold); }
+.prem-hi  { background:rgba(248,113,113,.12); color:var(--red); }
+.prem-ref { background:rgba(107,114,128,.1);  color:var(--muted); }
+
+/* flash update animation */
+@keyframes flash { 0%{background:rgba(212,168,67,.18)} 100%{background:transparent} }
+.flash { animation:flash .7s ease-out; }
+
+/* skeleton shimmer */
+.sk {
+  display:inline-block; height:18px; border-radius:4px; width:80px;
+  background: linear-gradient(90deg, var(--card2) 25%, var(--border) 50%, var(--card2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.1s infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* timestamp */
+.footer-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:12px; flex-wrap:wrap; gap:8px;
+}
+.ts { font-size:12px; font-weight:600; color:var(--muted); }
+
+/* note box */
+.note {
+  margin-top:14px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px 18px;
+  font-size:14px; font-weight:600; color:var(--muted); line-height:1.75;
+}
+.note b { color:var(--text); }
+
+/* responsive – hide USD column on small screens */
+@media (max-width:768px) {
+  .page { padding:16px 12px 50px; }
+  
+  .header { margin-bottom:16px; flex-direction:column; align-items:stretch; }
+  .logo { flex-direction:column; text-align:center; align-items:center; }
+  .logo-text h1 { font-size:20px; }
+  .header-right { justify-content:center; width:100%; }
+  
+  .world-strip { grid-template-columns: 1fr; gap:12px; margin-bottom:12px; }
+  .world-card { padding:14px 16px; }
+  .world-card .val { font-size:22px; }
+  
+  .settings { padding:12px 16px; gap:12px; flex-direction:column; }
+  .set-group { flex-direction:row; align-items:center; justify-content:space-between; }
+  .set-group label { min-width:110px; }
+  .set-group input, .set-group select { flex:1; min-width:auto; }
+  .set-note { align-self:flex-start; width:100%; }
+  
+  .table-wrap { border-radius:10px; }
+  table { font-size:15px; }
+  thead th { font-size:11px; padding:10px 8px; }
+  td { padding:12px 8px; }
+  .td-name .n { font-size:15px; }
+  .td-name .s { font-size:12px; }
+  .big { font-size:16px; }
+  .med { font-size:14px; }
+  .sm { font-size:12px; }
+  .badge { font-size:10px; }
+  
+  .hide-sm { display:none; }
+  
+  .ts { font-size:11px; }
+  .note { font-size:13px; line-height:1.6; padding:12px 14px; }
+  
+  .btn-refresh { padding:8px 14px; font-size:14px; }
+}
+
+@media (max-width:600px) {
+  .page { padding:12px 10px 40px; }
+  
+  .logo-icon { width:40px; height:40px; font-size:20px; }
+  .logo-text h1 { font-size:18px; }
+  .logo-text p { font-size:12px; }
+  
+  .world-strip { margin-bottom:10px; }
+  .world-card { padding:12px 14px; }
+  .world-card .lbl { font-size:11px; }
+  .world-card .val { font-size:20px; }
+  .world-card .sub { font-size:12px; }
+  
+  .settings { padding:10px 12px; gap:10px; }
+  .set-group { gap:8px; }
+  .set-group label { font-size:12px; min-width:100px; }
+  .set-group input, .set-group select { font-size:14px; padding:7px 10px; }
+  .set-group input[type="checkbox"] { width:40px; height:40px; }
+  
+  .table-wrap { margin:0 -10px; border-radius:0; }
+  table { font-size:14px; }
+  thead th { font-size:10px; padding:8px 6px; }
+  td { padding:10px 6px; }
+  .td-name { padding:10px 8px !important; }
+  .td-name .n { font-size:14px; }
+  .td-name .s { font-size:11px; margin-top:2px; }
+  .big { font-size:15px; }
+  .med { font-size:13px; }
+  .sm { font-size:11px; }
+  .badge { font-size:9px; padding:0px 5px; margin-left:5px; }
+  
+  .hide-sm { display:none; }
+  .prem { font-size:11px; padding:2px 7px; }
+  
+  .ts { font-size:10px; }
+  .note { font-size:12px; line-height:1.5; padding:10px 12px; margin-top:10px; }
+  
+  .btn-refresh { padding:7px 12px; font-size:13px; min-height:44px; }
+  .btn-refresh svg { width:14px; height:14px; }
+  
+  .live-badge { padding:5px 12px; font-size:13px; }
+  .dot { width:8px; height:8px; }
+}
+
+/* auto-refresh countdown ring */
+.countdown-ring {
+  width:34px; height:34px; flex-shrink:0;
+  transform:rotate(-90deg);
+}
+.ring-bg { fill:none; stroke:var(--border); stroke-width:3; }
+.ring-fg { fill:none; stroke:var(--gold-dim); stroke-width:3;
+  stroke-linecap:round; transition:stroke-dashoffset .5s linear; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">⊛</div>
+      <div class="logo-text">
+        <h1>Bảng Giá Vàng Việt Nam</h1>
+        <p>Quy đổi tự động theo giá quốc tế</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge" id="liveBadge">
+        <span class="dot"></span>
+        <span id="liveText">Đang tải...</span>
+      </div>
+      <button class="btn-refresh" id="btnRefresh" onclick="doFetch(true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Làm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- WORLD STRIP -->
+  <div class="world-strip">
+    <div class="world-card">
+      <div class="lbl">XAU / USD (Thế giới)</div>
+      <div class="val" id="wXAU"><span class="sk"></span></div>
+      <div class="sub" id="wChg">—</div>
+    </div>
+    <div class="world-card">
+      <div class="lbl">Giá / gram 24K</div>
+      <div class="val" id="wGram"><span class="sk"></span></div>
+      <div class="sub dim">USD</div>
+    </div>
+    <div class="world-card">
+      <div class="lbl">Tỷ giá USD / VNĐ</div>
+      <div class="val" id="wRate"><span class="sk"></span></div>
+      <div class="sub dim">VNĐ / $1</div>
+    </div>
+    <div class="world-card">
+      <div class="lbl">Giá tham chiếu / lượng</div>
+      <div class="val" id="wRef"><span class="sk"></span></div>
+      <div class="sub dim">chưa tính premium</div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="settings">
+    <div class="set-group">
+      <label>Tỷ giá USD/VNĐ</label>
+      <input type="number" id="iRate" value="25900" min="20000" max="35000" step="50" onchange="recalc()">
+    </div>
+    <div class="set-group">
+      <label>Auto tỷ giá</label>
+      <input type="checkbox" id="chkAutoRate" checked onchange="recalc()" title="Tự động cập nhật từ API">
+    </div>
+    <div class="set-group">
+      <label>Premium SJC (%)</label>
+      <input type="number" id="iPremSJC" value="10" min="0" max="50" step="1" onchange="recalc()">
+    </div>
+    <div class="set-group">
+      <label>Auto Premium</label>
+      <input type="checkbox" id="chkAutoPrem" checked onchange="recalc()" title="Tự động điều chỉnh theo thị trường">
+    </div>
+    <div class="set-group">
+      <label>Tự cập nhật</label>
+      <select id="iInterval" onchange="setTimer()">
+        <option value="30">30 giây</option>
+        <option value="60" selected>1 phút</option>
+        <option value="300">5 phút</option>
+        <option value="0">Tắt</option>
+      </select>
+    </div>
+    <div class="set-note" id="nextUpdate"></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Loại vàng</th>
+          <th class="hide-sm">Độ tinh khiết</th>
+          <th>VNĐ / lượng</th>
+          <th>VNĐ / chỉ</th>
+          <th>So thế giới</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);font-size:16px;font-weight:700;">
+          Đang lấy giá vàng thế giới...
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer-bar">
+    <span class="ts" id="tsUpdate">—</span>
+    <span class="ts" id="tsSource">Nguồn: gold-api.com (XAU/USD) + exchangerate.host (USD/VNĐ)</span>
+  </div>
+
+  <div class="note">
+    <b>🔄 Cập nhật tự động:</b> Tỷ giá USD/VNĐ được lấy real-time từ exchangerate.host · Premium SJC tự điều chỉnh theo trend giá (↑>3% = -1%, ↓<-3% = +1%)<br>
+    <b>Công thức quy đổi:</b> Giá VNĐ/lượng = (Giá XAU/USD + 1$) × 1,01 × 1,20565 × Tỷ giá<br>
+    Trong đó: <b>+1$</b> = phí vận chuyển & bảo hiểm · <b>×1,01</b> = thuế nhập khẩu 1% · <b>×1,20565</b> = quy đổi oz → lượng (1 lượng = 37,5g)<br>
+    Giá SJC thực tế = Giá tham chiếu × (1 + Premium%). <b>Giá tham chiếu chỉ mang tính định hướng — giá bán thực tế tại cửa hàng có thể khác.</b>
+  </div>
+</div>
+
+<script>
+// ── Cấu hình loại vàng ──
+const TYPES = [
+  { grp: '🏅 Vàng tích lũy & đầu tư' },
+  { key:'sjc',    name:'Vàng miếng SJC',     sub:'Thương hiệu quốc gia — thanh khoản cao nhất', pur:9999, f:1,      premium:'sjc' },
+  { key:'nhan24', name:'Vàng nhẫn 9999',      sub:'PNJ · DOJI · Phú Quý · Bảo Tín', pur:9999, f:1,      premium:'ref' },
+  { key:'v99',    name:'Vàng thô 99%',        sub:'Vàng nguyên chất — trao đổi tự do', pur:9900, f:.99,    premium:'ref' },
+  { key:'v98',    name:'Vàng thô 98%',        sub:'Vàng nguyên chất — giá mềm hơn',    pur:9800, f:.98,    premium:'ref' },
+  { grp: '💍 Vàng trang sức' },
+  { key:'22k',    name:'Vàng 22K (916)',       sub:'Nhẫn cưới, dây chuyền',           pur:9167, f:.9167,  premium:'none' },
+  { key:'18k',    name:'Vàng 18K (750)',       sub:'Trang sức phổ biến nhất',          pur:7500, f:.75,    premium:'none' },
+  { key:'14k',    name:'Vàng 14K (585)',       sub:'Trang sức thời trang',             pur:5850, f:.585,   premium:'none' },
+  { key:'10k',    name:'Vàng 10K (417)',       sub:'Nhẫn, phụ kiện giá thấp',         pur:4167, f:.4167,  premium:'none' },
+];
+
+let xauUSD = null, autoTimer = null, countdown = 0, cTimer = null;
+
+// ── Format helpers ──
+const vi = n => Math.round(n).toLocaleString('vi-VN');
+const us2 = n => n.toFixed(2);
+
+function getRate()    { return +document.getElementById('iRate').value    || 25900; }
+function getSJCPrem() { return (+document.getElementById('iPremSJC').value || 0) / 100; }
+function isAutoRate() { return document.getElementById('chkAutoRate')?.checked ?? true; }
+function isAutoPrem() { return document.getElementById('chkAutoPrem')?.checked ?? true; }
+
+// ── Core formula ──
+// price_per_luong = (xauUSD + 1) * 1.01 * 1.20565 * rate * factor
+function calcVND(xau, rate, factor) {
+  return (xau + 1) * 1.01 * 1.20565 * rate * factor;
+}
+
+// ── Render world strip ──
+function renderStrip(xau, chg, chgPct) {
+  document.getElementById('wXAU').textContent  = '$' + us2(xau);
+  document.getElementById('wGram').textContent = us2(xau / 31.1035);
+
+  const rate = getRate();
+  document.getElementById('wRate').textContent = vi(rate);
+  document.getElementById('wRef').textContent  = vi(calcVND(xau, rate, 1)) + ' ₫';
+
+  const el = document.getElementById('wChg');
+  if (chg !== undefined) {
+    const up = chg >= 0;
+    el.textContent = (up ? '+' : '') + us2(chg) + ' USD  (' + (up?'+':'') + us2(chgPct) + '%)';
+    el.className = 'sub ' + (up ? 'up' : 'down');
+  }
+}
+
+// ── Render table ──
+function recalc() {
+  if (xauUSD === null) return;
+  renderTable(xauUSD);
+  renderStrip(xauUSD);
+}
+
+function renderTable(xau) {
+  const rate  = getRate();
+  const sjcP  = getSJCPrem();
+  let html = '';
+
+  for (const r of TYPES) {
+    if (r.grp) {
+      html += `<tr class="tr-section"><td colspan="5">${r.grp}</td></tr>`;
+      continue;
+    }
+
+    const base = calcVND(xau, rate, r.f);
+    let display = base;
+    let premHtml = '';
+
+    if (r.premium === 'sjc') {
+      display = base * (1 + sjcP);
+      const p = sjcP * 100;
+      const cls = p <= 10 ? 'prem-ok' : p <= 15 ? 'prem-med' : 'prem-hi';
+      premHtml = `<span class="prem ${cls}">+${p.toFixed(0)}%</span>`;
+    } else if (r.premium === 'ref') {
+      premHtml = `<span class="prem prem-ref">Tham chiếu</span>`;
+    } else {
+      premHtml = `<span class="prem prem-ref">—</span>`;
+    }
+
+    const chi = display / 10;
+
+    html += `<tr>
+      <td><div class="td-name">
+        <div class="n">${r.name}<span class="badge">${r.pur}</span></div>
+        <div class="s">${r.sub}</div>
+      </div></td>
+      <td class="td-r hide-sm"><span class="sm">${(r.f*100).toFixed(2)}%</span></td>
+      <td class="td-r"><span class="big">${vi(display)} ₫</span></td>
+      <td class="td-r"><span class="med">${vi(chi)} ₫</span></td>
+      <td class="td-r">${premHtml}</td>
+    </tr>`;
+  }
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = html;
+
+  // flash
+  tbody.querySelectorAll('tr:not(.tr-section)').forEach(tr => {
+    tr.classList.remove('flash');
+    void tr.offsetWidth;
+    tr.classList.add('flash');
+  });
+}
+
+// ── Fetch từ Multiple APIs — tự động cập nhật tỷ giá & premium ──
+async function doFetch(manual = false) {
+  const btn  = document.getElementById('btnRefresh');
+  const badge = document.getElementById('liveBadge');
+  const liveT = document.getElementById('liveText');
+
+  btn.disabled = true;
+  btn.classList.add('spinning');
+
+  try {
+    // 1. Fetch XAU/USD từ gold-api.com
+    const resXau = await fetch('https://api.gold-api.com/price/XAU', {
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!resXau.ok) throw new Error('XAU HTTP ' + resXau.status);
+    const dXau = await resXau.json();
+
+    const price = dXau.price ?? dXau.ask ?? dXau.bid;
+    if (!price || isNaN(price)) throw new Error('Giá XAU không hợp lệ');
+
+    const prev = dXau.previousClose ?? dXau.prev_close ?? price;
+    const chg  = price - prev;
+    const pct  = prev ? (chg / prev) * 100 : 0;
+
+    // 2. Fetch tỷ giá USD/VNĐ từ exchangerate.host
+    if (isAutoRate()) {
+      try {
+        const resRate = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=VND', {
+          cache: 'no-store'
+        });
+        if (resRate.ok) {
+          const dRate = await resRate.json();
+          const newRate = Math.round(dRate.rates?.VND);
+          if (newRate && newRate > 20000 && newRate < 35000) {
+            document.getElementById('iRate').value = newRate;
+          }
+        }
+      } catch (e) {
+        console.warn('Tỷ giá lỗi:', e.message);
+      }
+    }
+
+    // 3. Premium SJC: dùng logic estimation dựa trên thị trường
+    if (isAutoPrem()) {
+      try {
+        // Tạm thời: duy trì giá trị hiện tại hoặc set default = 10%
+        let premValue = +document.getElementById('iPremSJC').value || 10;
+        // Có thể thêm logic: nếu giá tăng > 5% → premium giảm, giá giảm → premium tăng
+        if (pct > 3) premValue = Math.max(8, premValue - 1);
+        if (pct < -3) premValue = Math.min(15, premValue + 1);
+        document.getElementById('iPremSJC').value = Math.round(premValue);
+      } catch (e) {
+        console.warn('Premium adjustment lỗi:', e.message);
+      }
+    }
+
+    xauUSD = price;
+    renderStrip(price, chg, pct);
+    renderTable(price);
+
+    badge.className = 'live-badge live';
+    liveT.textContent = 'Live · gold-api.com + exchangerate.host';
+
+    const now = new Date();
+    document.getElementById('tsUpdate').textContent =
+      'Cập nhật lúc ' + now.toLocaleTimeString('vi-VN') + ' ngày ' + now.toLocaleDateString('vi-VN');
+
+  } catch (err) {
+    badge.className = 'live-badge error';
+    liveT.textContent = 'Lỗi kết nối';
+    console.error('Fetch error:', err);
+
+    if (xauUSD === null) {
+      document.getElementById('tbody').innerHTML =
+        `<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--red);font-size:16px;font-weight:700;">
+          ⚠️ Không lấy được giá — kiểm tra kết nối mạng
+        </td></tr>`;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('spinning');
+    if (!manual) resetCountdown();
+  }
+}
+
+// ── Countdown display ──
+function resetCountdown() {
+  const secs = +document.getElementById('iInterval').value;
+  if (!secs) { document.getElementById('nextUpdate').textContent = ''; return; }
+  countdown = secs;
+  updateCountdownText();
+}
+
+function updateCountdownText() {
+  const el = document.getElementById('nextUpdate');
+  if (countdown <= 0) { el.textContent = 'Đang cập nhật...'; return; }
+  const m = Math.floor(countdown / 60), s = countdown % 60;
+  el.textContent = 'Cập nhật sau: ' + (m ? m + ' phút ' : '') + s + 's';
+  countdown--;
+}
+
+// ── Auto-refresh timer ──
+function setTimer() {
+  if (autoTimer)  clearInterval(autoTimer);
+  if (cTimer)     clearInterval(cTimer);
+
+  const secs = +document.getElementById('iInterval').value;
+  document.getElementById('nextUpdate').textContent = secs ? '' : 'Tự cập nhật đã tắt';
+  if (!secs) return;
+
+  resetCountdown();
+  autoTimer = setInterval(() => { countdown = 0; doFetch(false); }, secs * 1000);
+  cTimer    = setInterval(updateCountdownText, 1000);
+}
+
+// ── Init ──
+doFetch(false);
+setTimer();
+</script>
+</body>
+</html>
