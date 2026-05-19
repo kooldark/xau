@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Bảng giá vàng Việt Nam real-time - cập nhật tự động từ giá quốc tế. Xem giá mua/bán SJC, vàng nhẫn, vàng thô với chênh lệch thị trường.">
+<meta name="author" content="Trần Như Tuấn">
+<meta name="creator" content="Trần Như Tuấn - 0379031662">
+<!-- Open Graph for sharing -->
+<meta property="og:title" content="Bảng Giá Vàng Việt Nam - Real-time">
+<meta property="og:description" content="Bảng giá vàng cập nhật tự động theo giá quốc tế. Mua vào - Bán ra SJC, vàng nhẫn, vàng thô.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xau.vn">
+<meta name="twitter:title" content="Bảng Giá Vàng Việt Nam">
+<meta name="twitter:description" content="Giá vàng real-time - Mua bán SJC, trang sức, vàng thô. Tác giả: Trần Như Tuấn">
 <title>Bảng Giá Vàng Việt Nam</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap');
@@ -32,11 +42,15 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* High contrast mode for elderly users */
+body.high-contrast { --text: #ffffff; --bg: #000000; --card: #1a1a1a; --border: #333333; }
+body.high-contrast .logo-text h1 { text-shadow: 0 0 8px rgba(255, 217, 102, 0.3); }
 
 /* subtle dot grid bg */
 body::before {
@@ -49,7 +63,7 @@ body::before {
 
 .page { position:relative; z-index:1; max-width:960px; margin:0 auto; padding:24px 16px 60px; }
 
-/* ── HEADER ── */
+/* ── HEADER ──  */
 .header {
   display:flex; align-items:center; justify-content:space-between;
   margin-bottom:20px; flex-wrap:wrap; gap:14px;
@@ -59,15 +73,15 @@ body::before {
   display:flex; align-items:center; gap:12px;
 }
 .logo-icon {
-  width:48px; height:48px;
+  width:64px; height:64px;
   background: linear-gradient(145deg,#8a6020,#d4a843);
   border-radius:12px;
   display:flex; align-items:center; justify-content:center;
-  font-size:24px; font-weight:900; color:#0d0f14;
+  font-size:36px; font-weight:900; color:#0d0f14;
   flex-shrink:0;
 }
-.logo-text h1 { font-size:24px; font-weight:800; color:var(--gold-lt); line-height:1.2; letter-spacing:-0.5px; }
-.logo-text p  { font-size:14px; color:var(--muted); margin-top:4px; font-weight:500; }
+.logo-text h1 { font-size:28px; font-weight:800; color:var(--gold-lt); line-height:1.2; letter-spacing:-0.5px; }
+.logo-text p  { font-size:16px; color:var(--muted); margin-top:4px; font-weight:500; }
 
 .header-right { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 
@@ -93,9 +107,9 @@ body::before {
 .btn-refresh {
   display:flex; align-items:center; gap:8px;
   background:var(--card2); border:1px solid var(--border);
-  color:var(--gold); font-family:inherit; font-size:15px; font-weight:700;
-  padding:10px 18px; border-radius:10px; cursor:pointer; transition:all .2s;
-  min-height:44px; min-width:44px; justify-content:center;
+  color:var(--gold); font-family:inherit; font-size:16px; font-weight:700;
+  padding:14px 24px; border-radius:10px; cursor:pointer; transition:all .2s;
+  min-height:54px; min-width:54px; justify-content:center;
   touch-action:manipulation; -webkit-user-select:none; user-select:none;
 }
 .btn-refresh:hover:not(:disabled) { border-color:var(--gold-dim); background:#1f2535; color:var(--gold-lt); }
@@ -103,6 +117,17 @@ body::before {
 .btn-refresh svg { width:16px; height:16px; }
 .spinning svg { animation:spin .8s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
+
+/* High contrast button */
+.btn-contrast {
+  background:var(--card2); border:1px solid var(--border);
+  color:var(--gold); font-size:20px; font-weight:700;
+  padding:12px 18px; border-radius:10px; cursor:pointer; transition:all .2s;
+  min-height:54px; min-width:54px; display:flex; align-items:center; justify-content:center;
+  touch-action:manipulation; -webkit-user-select:none; user-select:none;
+}
+.btn-contrast:hover { border-color:var(--gold-dim); background:#1f2535; }
+.btn-contrast.active { background:var(--gold); color:#0a0e17; border-color:var(--gold); }
 
 /* ── WORLD STRIP ── */
 .world-strip {
@@ -113,14 +138,14 @@ body::before {
 
 .world-card {
   background:var(--card); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px 18px;
+  border-radius:var(--radius); padding:20px 22px;
 }
 .world-card .lbl {
-  font-size:13px; font-weight:600; color:var(--muted);
+  font-size:15px; font-weight:600; color:var(--muted);
   text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;
 }
 .world-card .val {
-  font-size:28px; font-weight:700; color:var(--gold-lt);
+  font-size:32px; font-weight:700; color:var(--gold-lt);
   line-height:1; white-space:nowrap; font-family:var(--mono);
   letter-spacing:0.5px;
 }
@@ -140,17 +165,17 @@ body::before {
 }
 
 .set-group { display:flex; flex-direction:column; gap:5px; }
-.set-group label { font-size:14px; font-weight:600; color:var(--text); }
+.set-group label { font-size:15px; font-weight:600; color:var(--text); }
 .set-group input, .set-group select {
   background:var(--card2); border:1px solid var(--border);
-  color:var(--text); font-family:var(--mono); font-size:15px; font-weight:600;
-  padding:8px 12px; border-radius:9px; outline:none; min-width:110px;
-  min-height:44px; transition:border-color .2s;
+  color:var(--text); font-family:var(--mono); font-size:16px; font-weight:600;
+  padding:12px 16px; border-radius:9px; outline:none; min-width:130px;
+  min-height:54px; transition:border-color .2s;
   -webkit-appearance:none; appearance:none;
 }
 
 .set-group input[type="checkbox"] {
-  width:44px; height:44px; cursor:pointer; accent-color:var(--gold);
+  width:54px; height:54px; cursor:pointer; accent-color:var(--gold);
   padding:0; min-width:auto; min-height:auto;
   appearance:auto; -webkit-appearance:auto;
 }
@@ -161,6 +186,71 @@ body::before {
   align-self:flex-end; padding-bottom:2px;
 }
 
+.btn-settings {
+  background:var(--card2); border:1px solid var(--border);
+  color:var(--muted); font-family:inherit; font-size:15px; font-weight:700;
+  padding:12px 20px; border-radius:10px; cursor:pointer; transition:all .2s;
+  min-height:54px; touch-action:manipulation; -webkit-user-select:none; user-select:none;
+}
+.btn-settings:hover { border-color:var(--gold-dim); color:var(--gold); }
+
+/* ── ADVANCED SETTINGS ── */
+.advanced-settings {
+  background:rgba(245,200,66,.05); border:1px solid rgba(245,200,66,.2);
+  padding:12px 16px; gap:12px; flex-wrap:wrap;
+}
+
+/* ── FILTER SECTION ── */
+.filter-section {
+  display:flex; gap:8px; flex-wrap:wrap;
+  margin-bottom:16px; padding:14px; background:var(--card);
+  border:1px solid var(--border); border-radius:12px;
+  justify-content:center;
+}
+
+.btn-filter {
+  background:var(--card2); border:1.5px solid var(--border);
+  color:var(--muted); font-family:inherit; font-size:14px; font-weight:600;
+  padding:9px 16px; border-radius:20px; cursor:pointer; transition:all .2s;
+  min-height:40px; touch-action:manipulation; -webkit-user-select:none; user-select:none;
+  white-space:nowrap; flex:1; min-width:70px;
+}
+.btn-filter:hover { border-color:var(--gold-dim); color:var(--gold); background:rgba(245,200,66,.08); }
+.btn-filter.active { background:var(--gold); color:#0a0e17; border-color:var(--gold); box-shadow:0 2px 8px rgba(245,200,66,.2); }
+
+/* ── ACTION SECTION (BUY/SELL) ── */
+.action-section {
+  background:linear-gradient(135deg, rgba(245,200,66,.1) 0%, rgba(52,211,153,.05) 100%);
+  border:2px solid var(--border); border-radius:16px; padding:24px;
+  margin-bottom:20px;
+}
+
+.action-card {
+  background:var(--card); border:2px solid var(--border);
+  border-radius:14px; padding:20px 24px; flex:1; min-width:200px;
+  text-align:center; transition:all .3s;
+}
+
+.action-card.buy { border-color:rgba(255,107,107,.4); }
+.action-card.buy:hover { background:rgba(255,107,107,.08); border-color:rgba(255,107,107,.6); }
+
+.action-card.sell { border-color:rgba(52,211,153,.4); }
+.action-card.sell:hover { background:rgba(52,211,153,.08); border-color:rgba(52,211,153,.6); }
+
+.action-label {
+  font-size:16px; font-weight:700; color:var(--text);
+  margin-bottom:12px; letter-spacing:0.5px;
+}
+
+.action-price {
+  font-size:32px; font-weight:800; color:var(--gold-lt);
+  font-family:var(--mono); margin-bottom:8px;
+}
+
+.action-unit {
+  font-size:14px; font-weight:600; color:var(--muted);
+}
+
 /* ── TABLE ── */
 .table-wrap {
   background:var(--card); border:1px solid var(--border);
@@ -168,6 +258,65 @@ body::before {
 }
 
 table { width:100%; border-collapse:collapse; }
+
+/* Mobile card view (hidden on desktop) */
+.table-cards {
+  display:none; gap:12px; transition:opacity .2s ease;
+}
+
+.gold-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:16px;
+  transition:all .2s; position:relative; overflow:hidden;
+}
+
+.gold-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background:linear-gradient(135deg, rgba(245,200,66,.08) 0%, transparent 100%);
+  pointer-events:none; opacity:0; transition:opacity .2s;
+}
+
+.gold-card:hover {
+  border-color:rgba(245,200,66,.4); background:rgba(245,200,66,.02);
+}
+
+.gold-card:hover::before { opacity:1; }
+
+.card-name {
+  font-size:17px; font-weight:700; color:var(--text);
+  margin-bottom:6px; display:flex; align-items:center; gap:10px;
+  line-height:1.3;
+}
+
+.card-sub {
+  font-size:13px; color:var(--muted); margin-bottom:14px;
+  font-weight:500; line-height:1.4;
+}
+
+.card-prices {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+
+.card-price-row {
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding:12px; background:rgba(255,255,255,.04); border-radius:10px;
+  border:1px solid rgba(255,255,255,.06); transition:all .2s;
+}
+
+.card-price-row:hover {
+  background:rgba(255,255,255,.08); border-color:var(--border);
+}
+
+.card-price-label {
+  font-size:12px; font-weight:600; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;
+}
+
+.card-price-value {
+  font-size:18px; font-weight:700; font-family:var(--mono);
+  line-height:1.2;
+}
 
 /* section header rows */
 .tr-section td {
@@ -182,9 +331,9 @@ table { width:100%; border-collapse:collapse; }
 
 thead th {
   background:var(--card2);
-  font-size:13px; font-weight:700; color:var(--text);
+  font-size:15px; font-weight:700; color:var(--text);
   text-transform:uppercase; letter-spacing:.08em;
-  padding:14px 20px; text-align:left;
+  padding:18px 22px; text-align:left;
   border-bottom:1px solid var(--border);
 }
 thead th:not(:first-child) { text-align:right; }
@@ -194,26 +343,31 @@ tbody tr:last-child { border-bottom:none; }
 tbody tr:hover:not(.tr-section) { background:#1c2130; }
 tbody tr:active:not(.tr-section) { background:#1f2535; }
 
-td { padding:16px 20px; vertical-align:middle; }
+td { padding:18px 22px; vertical-align:middle; }
 
 /* name column */
-.td-name .n  { font-size:17px; font-weight:700; color:var(--text); line-height:1.3; letter-spacing:-0.3px; }
-.td-name .s  { font-size:14px; font-weight:500; color:var(--muted); margin-top:4px; }
+.td-name .n  { font-size:19px; font-weight:700; color:var(--text); line-height:1.3; letter-spacing:-0.3px; }
+.td-name .s  { font-size:15px; font-weight:500; color:var(--muted); margin-top:4px; }
 .badge {
   display:inline-block;
   background:rgba(245,200,66,.15); color:var(--gold);
-  border:1px solid rgba(245,200,66,.3);
-  font-size:12px; font-weight:700;
-  padding:2px 8px; border-radius:4px;
+  border:1px solid rgba(245,200,66,.35);
+  font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:5px;
   margin-left:8px; vertical-align:middle; white-space:nowrap;
-  font-family:var(--mono);
+  font-family:var(--mono); letter-spacing:0.3px;
+  transition:all .2s;
 }
 
 /* number columns */
 .td-r { text-align:right; }
-.big   { font-size:22px; font-weight:700; color:var(--gold-lt); font-family:var(--mono); }
-.med   { font-size:18px; font-weight:700; color:var(--text); font-family:var(--mono); }
-.sm    { font-size:15px; font-weight:600; color:var(--muted); }
+.big   { font-size:24px; font-weight:700; color:var(--gold-lt); font-family:var(--mono); }
+.med   { font-size:20px; font-weight:700; color:var(--text); font-family:var(--mono); }
+.sm    { font-size:16px; font-weight:600; color:var(--muted); }
+
+/* buy/sell price styling */
+.price-buy { color:#ff6b6b !important; }
+.price-sell { color:#34d399 !important; }
 
 /* premium badge */
 .prem {
@@ -229,6 +383,13 @@ td { padding:16px 20px; vertical-align:middle; }
 /* flash update animation */
 @keyframes flash { 0%{background:rgba(212,168,67,.18)} 100%{background:transparent} }
 .flash { animation:flash .7s ease-out; }
+
+/* smooth fade for section headers */
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.gold-card { animation:fadeInUp .3s ease-out; }
 
 /* skeleton shimmer */
 .sk {
@@ -255,85 +416,183 @@ td { padding:16px 20px; vertical-align:middle; }
 }
 .note b { color:var(--text); font-weight:700; }
 
+/* accordion */
+.accordion {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); margin-top:16px; overflow:hidden;
+}
+
+.accordion-header {
+  background:var(--card2); border:none;
+  padding:16px 18px; cursor:pointer; width:100%;
+  display:flex; justify-content:space-between; align-items:center;
+  color:var(--text); font-size:15px; font-weight:600;
+  transition:background .2s; font-family:inherit;
+  touch-action:manipulation; -webkit-user-select:none; user-select:none;
+}
+
+.accordion-header:hover { background:var(--card); border-bottom:1px solid var(--border); }
+.accordion-header::after { content:'▼'; font-size:12px; transition:transform .3s; }
+.accordion-header.active::after { transform:rotate(180deg); }
+
+.accordion-content {
+  max-height:0; overflow:hidden; transition:max-height .3s ease;
+  padding:0 18px;
+}
+
+.accordion-content.active {
+  max-height:1000px; padding:16px 18px;
+}
+
 /* responsive – hide USD column on small screens */
 @media (max-width:768px) {
   .page { padding:16px 12px 50px; }
   
   .header { margin-bottom:16px; flex-direction:column; align-items:stretch; }
-  .logo { flex-direction:column; text-align:center; align-items:center; }
-  .logo-text h1 { font-size:22px; }
-  .header-right { justify-content:center; width:100%; }
+  .logo { flex-direction:column; text-align:center; align-items:center; gap:10px; }
+  .logo-text h1 { font-size:24px; }
+  .header-right { justify-content:center; width:100%; gap:8px; flex-wrap:wrap; }
   
-  .world-strip { grid-template-columns: 1fr; gap:12px; margin-bottom:12px; }
-  .world-card { padding:14px 16px; }
-  .world-card .val { font-size:26px; }
+  .world-strip { grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px; }
+  .world-card { padding:16px 18px; }
+  .world-card .val { font-size:28px; }
   
-  .settings { padding:12px 16px; gap:12px; flex-direction:column; }
-  .set-group { flex-direction:row; align-items:center; justify-content:space-between; }
-  .set-group label { min-width:110px; }
-  .set-group input, .set-group select { flex:1; min-width:auto; }
-  .set-note { align-self:flex-start; width:100%; }
+  .action-section { padding:18px 20px; margin-bottom:18px; border-radius:12px; }
+  .action-card { min-width:auto; flex:1; padding:18px 20px; border-radius:10px; }
+  .action-price { font-size:26px; }
   
-  .table-wrap { border-radius:10px; }
-  table { font-size:15px; }
-  thead th { font-size:12px; padding:11px 10px; }
-  td { padding:12px 10px; }
-  .td-name .n { font-size:16px; }
-  .td-name .s { font-size:13px; }
-  .big { font-size:19px; }
-  .med { font-size:16px; }
-  .sm { font-size:13px; }
-  .badge { font-size:11px; }
+  .settings { padding:14px 16px; gap:14px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .set-group { flex:1; min-width:140px; }
+  .set-group label { font-size:15px; font-weight:700; }
+  .set-group input, .set-group select { min-height:50px; font-size:15px; border-radius:10px; }
+  .btn-settings { flex-shrink:0; min-height:50px; border-radius:10px; }
   
-  .hide-sm { display:none; }
+  .advanced-settings { padding:12px 16px; gap:12px; flex-direction:column; margin-bottom:14px; }
+  .advanced-settings .set-group { flex:none; width:100%; }
   
-  .ts { font-size:12px; }
-  .note { font-size:14px; line-height:1.7; padding:14px 16px; }
+  .filter-section { gap:8px; padding:12px 14px; margin-bottom:14px; border-radius:12px; }
+  .btn-filter { flex:1; min-width:auto; font-size:13px; padding:9px 12px; min-height:44px; border-radius:18px; }
   
-  .btn-refresh { padding:9px 16px; font-size:15px; }
+  .table-wrap { display:none; }
+  .table-cards { display:grid; grid-template-columns: 1fr; flex-direction:column; gap:12px; padding:0 12px; margin-bottom:16px; }
+  
+  .gold-card { padding:14px; border-radius:11px; }
+  .card-name { font-size:16px; font-weight:700; margin-bottom:6px; }
+  .card-sub { font-size:12px; margin-bottom:12px; }
+  .card-prices { gap:10px; }
+  .card-price-row { padding:11px; border-radius:9px; }
+  .card-price-label { font-size:11px; margin-bottom:5px; }
+  .card-price-value { font-size:17px; }
 }
 
 @media (max-width:600px) {
-  .page { padding:12px 10px 40px; }
+  .page { padding:14px 12px 60px; }
   
-  .logo-icon { width:40px; height:40px; font-size:20px; }
-  .logo-text h1 { font-size:20px; }
-  .logo-text p { font-size:13px; }
+  .header { gap:10px; margin-bottom:18px; }
+  .logo { gap:10px; }
+  .logo-icon { width:52px; height:52px; font-size:26px; }
+  .logo-text h1 { font-size:24px; }
+  .logo-text p { font-size:14px; }
+  .header-right { gap:8px; }
   
-  .world-strip { margin-bottom:10px; }
-  .world-card { padding:12px 14px; }
+  .world-strip { margin-bottom:12px; gap:10px; }
+  .world-card { padding:16px 14px; }
   .world-card .lbl { font-size:12px; }
-  .world-card .val { font-size:24px; }
+  .world-card .val { font-size:28px; }
   .world-card .sub { font-size:13px; }
   
-  .settings { padding:10px 12px; gap:10px; }
-  .set-group { gap:8px; }
-  .set-group label { font-size:13px; min-width:100px; }
-  .set-group input, .set-group select { font-size:14px; padding:8px 10px; }
-  .set-group input[type="checkbox"] { width:40px; height:40px; }
+  .action-section { padding:16px 14px; margin-bottom:16px; border-radius:12px; }
+  .action-card { min-width:auto; flex:1; padding:16px 14px; border-radius:10px; }
+  .action-label { font-size:15px; margin-bottom:10px; }
+  .action-price { font-size:26px; margin-bottom:8px; }
+  .action-unit { font-size:13px; }
   
-  .table-wrap { margin:0 -10px; border-radius:0; }
-  table { font-size:15px; }
-  thead th { font-size:12px; padding:10px 8px; }
-  td { padding:11px 8px; }
-  .td-name .n { font-size:15px; }
-  .td-name .s { font-size:12px; margin-top:2px; }
-  .big { font-size:18px; }
-  .med { font-size:15px; }
-  .sm { font-size:13px; }
-  .badge { font-size:10px; padding:1px 6px; margin-left:6px; }
+  .settings { padding:14px 12px; gap:12px; flex-direction:column; margin-bottom:14px; }
+  .set-group { gap:10px; }
+  .set-group label { font-size:15px; font-weight:700; }
+  .set-group input, .set-group select { font-size:16px; padding:12px 14px; min-height:54px; border-radius:10px; }
+  .set-group input[type="checkbox"] { width:54px; height:54px; }
+  .btn-settings { width:100%; min-height:54px; font-size:16px; border-radius:10px; }
+  
+  .advanced-settings { padding:12px 14px; gap:12px; margin-bottom:14px; }
+  .advanced-settings .set-group { width:100%; }
+  .advanced-settings input, .advanced-settings select { min-height:50px; }
+  
+  .filter-section { gap:8px; padding:12px 14px; margin-bottom:14px; border-radius:12px; justify-content:center; }
+  .btn-filter { font-size:13px; padding:10px 14px; min-height:44px; flex:1; min-width:70px; border-radius:18px; }
+  
+  .table-wrap { display:none; }
+  .table-cards { display:grid; grid-template-columns: 1fr; gap:12px; padding:0 12px; margin-bottom:16px; }
+  
+  .gold-card { padding:14px; border-radius:11px; }
+  .card-name { font-size:16px; font-weight:700; margin-bottom:6px; }
+  .card-sub { font-size:12px; margin-bottom:12px; }
+  .card-prices { grid-template-columns:1fr 1fr; gap:10px; }
+  .card-price-row { padding:11px; border-radius:9px; }
+  .card-price-label { font-size:11px; margin-bottom:5px; }
+  .card-price-value { font-size:17px; }
+  .badge { font-size:12px; padding:2px 8px; margin-left:8px; }
   
   .hide-sm { display:none; }
-  .prem { font-size:12px; padding:2px 8px; }
   
-  .ts { font-size:12px; }
-  .note { font-size:13px; line-height:1.6; padding:12px 14px; margin-top:12px; }
+  .ts { font-size:13px; }
+  .note { font-size:14px; line-height:1.7; padding:14px 14px; margin-top:16px; border-radius:10px; }
   
-  .btn-refresh { padding:8px 14px; font-size:14px; min-height:44px; }
-  .btn-refresh svg { width:14px; height:14px; }
+  .btn-refresh { padding:12px 18px; font-size:16px; min-height:54px; border-radius:10px; }
+  .btn-refresh svg { width:16px; height:16px; }
+  .btn-contrast { min-height:54px; min-width:54px; font-size:18px; border-radius:10px; }
   
-  .live-badge { padding:6px 12px; font-size:13px; }
-  .dot { width:8px; height:8px; }
+  .live-badge { padding:10px 14px; font-size:15px; min-height:54px; border-radius:10px; }
+  .dot { width:9px; height:9px; }
+}
+
+/* Ultra-small screens (< 480px) */
+@media (max-width:480px) {
+  .page { padding:12px 10px 50px; }
+  
+  .header { gap:8px; margin-bottom:14px; }
+  .logo { gap:8px; }
+  .logo-icon { width:48px; height:48px; font-size:24px; }
+  .logo-text h1 { font-size:22px; }
+  .logo-text p { font-size:13px; }
+  .header-right { gap:6px; }
+  
+  .world-strip { grid-template-columns: 1fr; gap:8px; margin-bottom:10px; }
+  .world-card { padding:14px 12px; }
+  .world-card .lbl { font-size:11px; }
+  .world-card .val { font-size:26px; }
+  .world-card .sub { font-size:12px; }
+  
+  .action-section { padding:14px 12px; margin-bottom:12px; border-radius:10px; }
+  .action-card { padding:14px 12px; border-radius:8px; }
+  .action-label { font-size:14px; }
+  .action-price { font-size:24px; }
+  .action-unit { font-size:12px; }
+  
+  .settings { padding:12px 10px; gap:10px; margin-bottom:12px; }
+  .set-group { gap:8px; }
+  .set-group label { font-size:14px; }
+  .set-group input, .set-group select { font-size:15px; padding:10px 12px; min-height:48px; }
+  .btn-settings { min-height:48px; font-size:15px; }
+  
+  .filter-section { gap:7px; padding:10px 12px; margin-bottom:12px; border-radius:10px; }
+  .btn-filter { font-size:12px; padding:9px 11px; min-height:42px; border-radius:16px; }
+  
+  .table-wrap { display:none; }
+  .table-cards { gap:10px; padding:0 10px; margin-bottom:14px; }
+  
+  .gold-card { padding:12px; border-radius:10px; }
+  .card-name { font-size:15px; font-weight:700; margin-bottom:5px; }
+  .card-sub { font-size:11px; margin-bottom:10px; }
+  .card-prices { gap:9px; }
+  .card-price-row { padding:10px; border-radius:8px; }
+  .card-price-label { font-size:10px; margin-bottom:4px; }
+  .card-price-value { font-size:16px; }
+  
+  .btn-refresh { padding:10px 14px; font-size:15px; min-height:48px; }
+  .btn-refresh svg { width:15px; height:15px; }
+  .btn-contrast { min-height:48px; min-width:48px; font-size:16px; }
+  .live-badge { padding:8px 12px; font-size:13px; min-height:48px; }
 }
 
 /* auto-refresh countdown ring */
@@ -359,6 +618,7 @@ td { padding:16px 20px; vertical-align:middle; }
       </div>
     </div>
     <div class="header-right">
+      <button class="btn-contrast" id="btnContrast" title="Chế độ cao độ tương phản">🔆</button>
       <div class="live-badge" id="liveBadge">
         <span class="dot"></span>
         <span id="liveText">Đang tải...</span>
@@ -405,13 +665,19 @@ td { padding:16px 20px; vertical-align:middle; }
       <input type="number" id="iRate" value="25900" min="20000" max="35000" step="50" onchange="recalc()">
     </div>
     <div class="set-group">
-      <label>Auto tỷ giá</label>
+      <label>Tự động tỷ giá</label>
       <input type="checkbox" id="chkAutoRate" checked onchange="recalc()" title="Tự động cập nhật từ API">
     </div>
     <div class="set-group">
       <label>Premium SJC (%)</label>
       <input type="number" id="iPremSJC" value="10" min="0" max="50" step="1" onchange="recalc()">
     </div>
+    <button class="btn-settings" id="btnSettings" onclick="toggleAdvanced()">⚙️ Nâng cao</button>
+    <div class="set-note" id="nextUpdate"></div>
+  </div>
+
+  <!-- ADVANCED SETTINGS (HIDDEN) -->
+  <div class="settings advanced-settings" id="advancedSettings" style="display:none;">
     <div class="set-group">
       <label>Auto Premium</label>
       <input type="checkbox" id="chkAutoPrem" checked onchange="recalc()" title="Tự động điều chỉnh theo thị trường">
@@ -425,8 +691,34 @@ td { padding:16px 20px; vertical-align:middle; }
         <option value="0">Tắt</option>
       </select>
     </div>
-    <div class="set-note" id="nextUpdate"></div>
   </div>
+
+  <!-- GOLD TYPE FILTER -->
+  <div class="filter-section">
+    <button class="btn-filter active" onclick="filterGold('all')">Tất cả</button>
+    <button class="btn-filter" onclick="filterGold('sjc')">🏅 SJC</button>
+    <button class="btn-filter" onclick="filterGold('jewelry')">💍 Trang sức</button>
+    <button class="btn-filter" onclick="filterGold('raw')">🔱 Thô</button>
+  </div>
+
+  <!-- BUY/SELL ACTION SECTION -->
+  <div class="action-section" style="display:none;">
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+      <div class="action-card buy">
+        <div class="action-label">💰 CỬA HÀNG MUA VÀO</div>
+        <div class="action-price" id="buyPrice">—</div>
+        <div class="action-unit">₫ / lượng</div>
+      </div>
+      <div class="action-card sell">
+        <div class="action-label">💵 CỬA HÀNG BÁN RA</div>
+        <div class="action-price" id="sellPrice">—</div>
+        <div class="action-unit">₫ / lượng</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE CARD VIEW -->
+  <div class="table-cards" id="tableCards"></div>
 
   <!-- TABLE -->
   <div class="table-wrap">
@@ -434,14 +726,12 @@ td { padding:16px 20px; vertical-align:middle; }
       <thead>
         <tr>
           <th>Loại vàng</th>
-          <th class="hide-sm">Độ tinh khiết</th>
-          <th>VNĐ / lượng</th>
-          <th>VNĐ / chỉ</th>
-          <th>So thế giới</th>
+          <th class="td-r">Mua vào (₫)</th>
+          <th class="td-r">Bán ra (₫)</th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);font-size:16px;font-weight:700;">
+        <tr><td colspan="3" style="text-align:center;padding:40px;color:var(--muted);font-size:16px;font-weight:700;">
           Đang lấy giá vàng thế giới...
         </td></tr>
       </tbody>
@@ -453,30 +743,47 @@ td { padding:16px 20px; vertical-align:middle; }
     <span class="ts" id="tsSource">Nguồn: gold-api.com (XAU/USD) + exchangerate.host (USD/VNĐ)</span>
   </div>
 
+  <div class="accordion">
+    <button class="accordion-header" onclick="toggleAccordion(event)">ℹ️ Hướng dẫn & Công thức</button>
+    <div class="accordion-content">
+      <b>💰 Cột Mua/Bán:</b> Mua vào (đỏ) = giá cửa hàng mua từ khách hàng · Bán ra (xanh) = giá cửa hàng bán cho khách hàng (áp dụng margin 3%)<br><br>
+      <b>🔄 Cập nhật tự động:</b> Tỷ giá USD/VNĐ được lấy real-time từ exchangerate.host · Premium SJC tự điều chỉnh theo trend giá (↑>3% = -1%, ↓<-3% = +1%)<br><br>
+      <b>Công thức quy đổi:</b> Giá VNĐ/lượng = (Giá XAU/USD + 1$) × 1,01 × 1,20565 × Tỷ giá<br>
+      Trong đó: <b>+1$</b> = phí vận chuyển & bảo hiểm · <b>×1,01</b> = thuế nhập khẩu 1% · <b>×1,20565</b> = quy đổi oz → lượng (1 lượng = 37,5g)<br><br>
+      Giá SJC thực tế = Giá tham chiếu × (1 + Premium%). <b>Giá tham chiếu chỉ mang tính định hướng — giá bán thực tế tại cửa hàng có thể khác.</b>
+    </div>
+  </div>
+
   <div class="note">
-    <b>🔄 Cập nhật tự động:</b> Tỷ giá USD/VNĐ được lấy real-time từ exchangerate.host · Premium SJC tự điều chỉnh theo trend giá (↑>3% = -1%, ↓<-3% = +1%)<br>
+    <b>� Cột Mua/Bán:</b> Mua vào (đỏ) = giá cửa hàng mua từ khách hàng · Bán ra (xanh) = giá cửa hàng bán cho khách hàng (áp dụng margin 3%)<br>
+    <b>�🔄 Cập nhật tự động:</b> Tỷ giá USD/VNĐ được lấy real-time từ exchangerate.host · Premium SJC tự điều chỉnh theo trend giá (↑>3% = -1%, ↓<-3% = +1%)<br>
     <b>Công thức quy đổi:</b> Giá VNĐ/lượng = (Giá XAU/USD + 1$) × 1,01 × 1,20565 × Tỷ giá<br>
     Trong đó: <b>+1$</b> = phí vận chuyển & bảo hiểm · <b>×1,01</b> = thuế nhập khẩu 1% · <b>×1,20565</b> = quy đổi oz → lượng (1 lượng = 37,5g)<br>
     Giá SJC thực tế = Giá tham chiếu × (1 + Premium%). <b>Giá tham chiếu chỉ mang tính định hướng — giá bán thực tế tại cửa hàng có thể khác.</b>
   </div>
-</div>
+  <!-- FOOTER -->
+  <div style="margin-top:32px; padding-top:20px; border-top:1px solid var(--border); text-align:center; color:var(--muted); font-size:13px;">
+    <div><b>Phát triển bởi:</b> Trần Như Tuấn</div>
+    <div style="margin-top:8px;">📱 <a href="tel:0379031662" style="color:var(--gold); text-decoration:none; font-weight:600;">0379031662</a></div>
+    <div style="margin-top:12px; font-size:12px; color:var(--muted);">© 2026 Bảng Giá Vàng Việt Nam</div>
+  </div></div>
 
 <script>
 // ── Cấu hình loại vàng ──
 const TYPES = [
   { grp: '🏅 Vàng tích lũy & đầu tư' },
-  { key:'sjc',    name:'Vàng miếng SJC',     sub:'Thương hiệu quốc gia — thanh khoản cao nhất', pur:9999, f:1,      premium:'sjc' },
-  { key:'nhan24', name:'Vàng nhẫn 9999',      sub:'PNJ · DOJI · Phú Quý · Bảo Tín', pur:9999, f:1,      premium:'ref' },
-  { key:'v99',    name:'Vàng thô 99%',        sub:'Vàng nguyên chất — trao đổi tự do', pur:9900, f:.99,    premium:'ref' },
-  { key:'v98',    name:'Vàng thô 98%',        sub:'Vàng nguyên chất — giá mềm hơn',    pur:9800, f:.98,    premium:'ref' },
+  { key:'sjc',    name:'Vàng miếng SJC',     sub:'Thương hiệu quốc gia — thanh khoản cao nhất', pur:9999, f:1,      premium:'sjc',  filter:'sjc' },
+  { key:'nhan24', name:'Vàng nhẫn 9999',     sub:'PNJ · DOJI · Phú Quý · Bảo Tín',        pur:9999, f:1,      premium:'ref',  filter:'sjc' },
+  { key:'v99',    name:'Vàng thô 99%',       sub:'Vàng nguyên chất — trao đổi tự do',     pur:9900, f:.99,    premium:'ref',  filter:'raw' },
+  { key:'v98',    name:'Vàng thô 98%',       sub:'Vàng nguyên chất — giá mềm hơn',        pur:9800, f:.98,    premium:'ref',  filter:'raw' },
   { grp: '💍 Vàng trang sức' },
-  { key:'22k',    name:'Vàng 22K (916)',       sub:'Nhẫn cưới, dây chuyền',           pur:9167, f:.9167,  premium:'none' },
-  { key:'18k',    name:'Vàng 18K (750)',       sub:'Trang sức phổ biến nhất',          pur:7500, f:.75,    premium:'none' },
-  { key:'14k',    name:'Vàng 14K (585)',       sub:'Trang sức thời trang',             pur:5850, f:.585,   premium:'none' },
-  { key:'10k',    name:'Vàng 10K (417)',       sub:'Nhẫn, phụ kiện giá thấp',         pur:4167, f:.4167,  premium:'none' },
+  { key:'22k',    name:'Vàng 22K (916)',     sub:'Nhẫn cưới, dây chuyền',                 pur:9167, f:.9167,  premium:'none', filter:'jewelry' },
+  { key:'18k',    name:'Vàng 18K (750)',     sub:'Trang sức phổ biến nhất',               pur:7500, f:.75,    premium:'none', filter:'jewelry' },
+  { key:'14k',    name:'Vàng 14K (585)',     sub:'Trang sức thời trang',                  pur:5850, f:.585,   premium:'none', filter:'jewelry' },
+  { key:'10k',    name:'Vàng 10K (417)',     sub:'Nhẫn, phụ kiện giá thấp',               pur:4167, f:.4167,  premium:'none', filter:'jewelry' },
 ];
 
-let xauUSD = null, autoTimer = null, countdown = 0, cTimer = null;
+let xauUSD = null, autoTimer = null, countdown = 0, cTimer = null, currentFilter = 'all';
 
 // ── Format helpers ──
 const vi = n => Math.round(n).toLocaleString('vi-VN');
@@ -500,7 +807,8 @@ function renderStrip(xau, chg, chgPct) {
 
   const rate = getRate();
   document.getElementById('wRate').textContent = vi(rate);
-  document.getElementById('wRef').textContent  = vi(calcVND(xau, rate, 1)) + ' ₫';
+  const refPrice = calcVND(xau, rate, 1);
+  document.getElementById('wRef').textContent  = vi(refPrice) + ' ₫';
 
   const el = document.getElementById('wChg');
   if (chg !== undefined) {
@@ -508,6 +816,13 @@ function renderStrip(xau, chg, chgPct) {
     el.textContent = (up ? '+' : '') + us2(chg) + ' USD  (' + (up?'+':'') + us2(chgPct) + '%)';
     el.className = 'sub ' + (up ? 'up' : 'down');
   }
+
+  // Update BUY/SELL prices
+  const buyPrice = Math.floor(refPrice * 0.97);  // Store buys at 3% lower
+  const sellPrice = Math.ceil(refPrice * 1.03);  // Store sells at 3% higher
+  
+  document.getElementById('buyPrice').textContent = vi(buyPrice) + ' ₫';
+  document.getElementById('sellPrice').textContent = vi(sellPrice) + ' ₫';
 }
 
 // ── Render table ──
@@ -520,45 +835,75 @@ function recalc() {
 function renderTable(xau) {
   const rate  = getRate();
   const sjcP  = getSJCPrem();
-  let html = '';
+  let htmlTable = '';
+  let htmlCards = '';
+  let lastGroup = '';
+  let lastGroupCard = '';
 
   for (const r of TYPES) {
     if (r.grp) {
-      html += `<tr class="tr-section"><td colspan="5">${r.grp}</td></tr>`;
+      lastGroup = r.grp;
+      lastGroupCard = r.grp;
       continue;
+    }
+
+    // Apply filter
+    if (currentFilter !== 'all' && r.filter !== currentFilter) continue;
+
+    // Show group header only once
+    if (lastGroup) {
+      htmlTable += `<tr class="tr-section"><td colspan="3">${lastGroup}</td></tr>`;
+      lastGroup = '';
+    }
+    if (lastGroupCard) {
+      htmlCards += `<div style="grid-column:1/-1; padding:10px 0; margin:8px 0 4px 0; background:linear-gradient(90deg, rgba(245,200,66,.2) 0%, transparent 100%); border-left:3px solid var(--gold); padding-left:12px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); line-height:1.5;">${lastGroupCard}</div>`;
+      lastGroupCard = '';
     }
 
     const base = calcVND(xau, rate, r.f);
     let display = base;
-    let premHtml = '';
 
     if (r.premium === 'sjc') {
       display = base * (1 + sjcP);
-      const p = sjcP * 100;
-      const cls = p <= 10 ? 'prem-ok' : p <= 15 ? 'prem-med' : 'prem-hi';
-      premHtml = `<span class="prem ${cls}">+${p.toFixed(0)}%</span>`;
-    } else if (r.premium === 'ref') {
-      premHtml = `<span class="prem prem-ref">Tham chiếu</span>`;
-    } else {
-      premHtml = `<span class="prem prem-ref">—</span>`;
     }
 
-    const chi = display / 10;
+    // Calculate buy/sell prices (3% margin)
+    const buyPrice = Math.floor(display * 0.97);
+    const sellPrice = Math.ceil(display * 1.03);
 
-    html += `<tr>
+    htmlTable += `<tr>
       <td><div class="td-name">
         <div class="n">${r.name}<span class="badge">${r.pur}</span></div>
         <div class="s">${r.sub}</div>
       </div></td>
-      <td class="td-r hide-sm"><span class="sm">${(r.f*100).toFixed(2)}%</span></td>
-      <td class="td-r"><span class="big">${vi(display)} ₫</span></td>
-      <td class="td-r"><span class="med">${vi(chi)} ₫</span></td>
-      <td class="td-r">${premHtml}</td>
+      <td class="td-r"><span class="big price-buy">${vi(buyPrice)} ₫</span></td>
+      <td class="td-r"><span class="big price-sell">${vi(sellPrice)} ₫</span></td>
     </tr>`;
+
+    htmlCards += `<div class="gold-card">
+      <div class="card-name">${r.name}<span class="badge">${r.pur}</span></div>
+      <div class="card-sub">${r.sub}</div>
+      <div class="card-prices">
+        <div class="card-price-row">
+          <div class="card-price-label">💰 Mua vào</div>
+          <div class="card-price-value price-buy">${vi(buyPrice)} ₫</div>
+        </div>
+        <div class="card-price-row">
+          <div class="card-price-label">💵 Bán ra</div>
+          <div class="card-price-value price-sell">${vi(sellPrice)} ₫</div>
+        </div>
+      </div>
+    </div>`;
   }
 
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = html;
+  tbody.innerHTML = htmlTable;
+  
+  // Render cards for mobile
+  const tableCards = document.getElementById('tableCards');
+  tableCards.innerHTML = htmlCards;
+  tableCards.style.display = 'grid';
+  tableCards.style.gridTemplateColumns = '1fr';
 
   // flash
   tbody.querySelectorAll('tr:not(.tr-section)').forEach(tr => {
@@ -684,7 +1029,58 @@ function setTimer() {
   cTimer    = setInterval(updateCountdownText, 1000);
 }
 
+// ── High Contrast Toggle ──
+function toggleContrast() {
+  const btn = document.getElementById('btnContrast');
+  const body = document.body;
+  body.classList.toggle('high-contrast');
+  btn.classList.toggle('active');
+  localStorage.setItem('highContrast', body.classList.contains('high-contrast'));
+}
+
+// ── Toggle Advanced Settings ──
+function toggleAdvanced() {
+  const adv = document.getElementById('advancedSettings');
+  adv.style.display = adv.style.display === 'none' ? 'flex' : 'none';
+}
+
+// ── Filter Gold Types ──
+function filterGold(type) {
+  currentFilter = type;
+  
+  // Update button states
+  document.querySelectorAll('.btn-filter').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Re-render table with smooth transition
+  if (xauUSD !== null) {
+    const cards = document.getElementById('tableCards');
+    cards.style.opacity = '0.7';
+    renderTable(xauUSD);
+    setTimeout(() => { cards.style.opacity = '1'; }, 100);
+  }
+}
+
+// ── Accordion Toggle ──
+function toggleAccordion(e) {
+  const header = e.target;
+  const content = header.nextElementSibling;
+  
+  header.classList.toggle('active');
+  content.classList.toggle('active');
+}
+
 // ── Init ──
+// Restore high contrast preference
+if (localStorage.getItem('highContrast') === 'true') {
+  toggleContrast();
+}
+
+// Setup contrast button listener
+document.getElementById('btnContrast').addEventListener('click', toggleContrast);
+
 doFetch(false);
 setTimer();
 </script>
