@@ -55,6 +55,19 @@
 		.estimate-cell + .estimate-cell { border-left: 1px solid var(--line); }
 		.estimate-discount { color: var(--muted); font: 700 13px Arial, sans-serif; }
 		.estimate-price { margin-top: 7px; color: var(--gold); font: 700 17px/1.3 Arial, sans-serif; overflow-wrap: anywhere; }
+		.history-section { min-width: 0; margin-top: 24px; padding: 20px 22px 14px; border: 1px solid var(--line); background: var(--panel); }
+		.history-heading { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
+		.history-copy { display: grid; gap: 6px; }
+		.history-title { margin: 0; font: 700 17px Arial, sans-serif; }
+		.history-subtitle, .history-message { color: var(--muted); font: 13px/1.5 Arial, sans-serif; }
+		.range-control { display: flex; flex-wrap: wrap; gap: 4px; }
+		.range-button { min-height: 36px; padding: 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font: 600 13px Arial, sans-serif; }
+		.range-button:hover { background: var(--green-pale); color: var(--green); }
+		.range-button[aria-pressed="true"] { border-bottom-color: var(--green); color: var(--green); }
+		.chart-wrap { position: relative; width: 100%; min-width: 0; height: 320px; margin-top: 18px; overflow: hidden; }
+		.chart-wrap canvas { display: block; max-width: 100%; }
+		.history-message { min-height: 20px; margin: 8px 0 0; }
+		.history-message.error { color: var(--red); }
 		.board-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; padding: 13px 22px; border-top: 1px solid var(--line); color: var(--muted); font: 13px Arial, sans-serif; }
 		.message { min-height: 24px; margin: 14px 0 0; color: var(--muted); font: 14px/1.55 Arial, sans-serif; }
 		.message.error { color: var(--red); }
@@ -84,6 +97,11 @@
 			.estimate-row { padding-right: 14px; padding-left: 14px; }
 			.estimate-cell { padding-right: 7px; padding-left: 7px; }
 			.estimate-price { font-size: 14px; }
+			.history-section { padding: 16px 14px 12px; }
+			.history-title { font-size: 16px; }
+			.range-control { width: 100%; }
+			.range-button { padding: 0 9px; }
+			.chart-wrap { height: 260px; }
 			.endpoint-row { flex-wrap: wrap; }
 			.endpoint-row input { flex-basis: 100%; }
 		}
@@ -143,6 +161,25 @@
 			</div>
 		</section>
 
+		<section class="history-section" aria-labelledby="historyTitle">
+			<div class="history-heading">
+				<div class="history-copy">
+					<h2 class="history-title" id="historyTitle">Biểu đồ giá SJC · 1 tháng</h2>
+					<div class="history-subtitle">Đồng/lượng · Mua vào và bán ra</div>
+				</div>
+				<div class="range-control" role="group" aria-label="Khoảng thời gian biểu đồ">
+					<button class="range-button" type="button" data-days="7" aria-pressed="false">7 ngày</button>
+					<button class="range-button" type="button" data-days="30" aria-pressed="true">1 tháng</button>
+					<button class="range-button" type="button" data-days="90" aria-pressed="false">3 tháng</button>
+					<button class="range-button" type="button" data-days="365" aria-pressed="false">1 năm</button>
+				</div>
+			</div>
+			<div class="chart-wrap">
+				<canvas id="historyChart" role="img" aria-label="Biểu đồ giá mua vào và bán ra vàng SJC trong 30 ngày"></canvas>
+			</div>
+			<p class="history-message" id="historyMessage" role="status">Đang tải lịch sử giá…</p>
+		</section>
+
 		<p class="message" id="message" role="status">Đang kết nối nguồn giá vàng SJC.</p>
 		<div class="actions">
 			<button id="refreshButton" type="button">↻ Cập nhật ngay</button>
@@ -167,6 +204,7 @@
 		</details>
 	</main>
 
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
 	<script>
 		const endpointInput = document.getElementById('endpoint');
 		const refreshButton = document.getElementById('refreshButton');
@@ -174,7 +212,12 @@
 		const status = document.getElementById('status');
 		const statusText = document.getElementById('statusText');
 		const formatter = new Intl.NumberFormat('vi-VN');
+		const historyFormatter = new Intl.NumberFormat('vi-VN');
+		const historyEndpoint = 'https://www.vang.today/api/prices?type=SJL1L10&days=';
+		const historyPeriods = { 7: '7 ngày', 30: '1 tháng', 90: '3 tháng', 365: '1 năm' };
+		let selectedHistoryDays = 30;
 		let refreshTimer;
+		let historyChart;
 
 		const endpointStorageKey = 'sjc-price-endpoint-vang-today';
 		endpointInput.value = localStorage.getItem(endpointStorageKey) || 'https://www.vang.today/api/prices?type=SJL1L10';
@@ -188,6 +231,57 @@
 			const value = Number(data[primary] ?? data[alternate]);
 			if (!Number.isFinite(value) || value <= 0) throw new Error(`Dữ liệu ${primary} không hợp lệ.`);
 			return value;
+		}
+
+		async function loadHistory() {
+			const historyMessage = document.getElementById('historyMessage');
+			historyMessage.className = 'history-message';
+			try {
+				const response = await fetch(`${historyEndpoint}${selectedHistoryDays}`, { cache: 'no-store', headers: { Accept: 'application/json' } });
+				if (!response.ok) throw new Error(`API lịch sử trả HTTP ${response.status}.`);
+				const data = await response.json();
+				const history = Array.isArray(data.history) ? data.history.slice().reverse() : [];
+				const records = history.map(day => ({
+					date: day.date,
+					buy: Number(day.prices?.SJL1L10?.buy),
+					sell: Number(day.prices?.SJL1L10?.sell)
+				})).filter(day => day.date && Number.isFinite(day.buy) && Number.isFinite(day.sell));
+				if (!records.length) throw new Error('API chưa có dữ liệu lịch sử SJC.');
+				if (typeof Chart === 'undefined') throw new Error('Không tải được thư viện biểu đồ.');
+
+				const chartData = {
+					labels: records.map(day => new Date(`${day.date}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })),
+					datasets: [
+						{ label: 'Mua vào', data: records.map(day => day.buy), borderColor: '#1b5c4f', backgroundColor: '#1b5c4f', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25 },
+						{ label: 'Bán ra', data: records.map(day => day.sell), borderColor: '#bd8c2c', backgroundColor: '#bd8c2c', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25 }
+					]
+				};
+				const chartOptions = {
+					responsive: true,
+					maintainAspectRatio: false,
+					interaction: { mode: 'index', intersect: false },
+					plugins: {
+						legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Arial', size: 13 } } },
+						tooltip: { callbacks: { label: context => `${context.dataset.label}: ${historyFormatter.format(context.parsed.y)} đồng/lượng` } }
+					},
+					scales: {
+						x: { grid: { display: false }, ticks: { maxTicksLimit: 8, maxRotation: 0 } },
+						y: { beginAtZero: false, ticks: { callback: value => `${(value / 1000000).toLocaleString('vi-VN')} tr` } }
+					}
+				};
+
+				if (historyChart) {
+					historyChart.data = chartData;
+					historyChart.update('none');
+				} else {
+					historyChart = new Chart(document.getElementById('historyChart'), { type: 'line', data: chartData, options: chartOptions });
+				}
+				const firstDate = new Date(`${records[0].date}T00:00:00`).toLocaleDateString('vi-VN');
+				historyMessage.textContent = `${records.length} mốc giá · Từ ${firstDate} · Cập nhật ${new Date().toLocaleTimeString('vi-VN')}`;
+			} catch (error) {
+				historyMessage.className = 'history-message error';
+				historyMessage.textContent = `${error.message} Vui lòng thử tải lại.`;
+			}
 		}
 
 		async function loadPrice() {
@@ -238,7 +332,7 @@
 		function setRefreshInterval() {
 			clearInterval(refreshTimer);
 			const seconds = Number(document.getElementById('interval').value);
-			if (seconds > 0) refreshTimer = setInterval(loadPrice, seconds * 1000);
+			if (seconds > 0) refreshTimer = setInterval(() => { loadPrice(); loadHistory(); }, seconds * 1000);
 		}
 
 		document.getElementById('saveEndpoint').addEventListener('click', () => {
@@ -247,10 +341,19 @@
 			localStorage.setItem(endpointStorageKey, endpoint);
 			loadPrice();
 		});
-		refreshButton.addEventListener('click', loadPrice);
+		refreshButton.addEventListener('click', () => { loadPrice(); loadHistory(); });
 		document.getElementById('interval').addEventListener('change', setRefreshInterval);
+		document.querySelectorAll('.range-button').forEach(button => {
+			button.addEventListener('click', () => {
+				selectedHistoryDays = Number(button.dataset.days);
+				document.querySelectorAll('.range-button').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
+				document.getElementById('historyTitle').textContent = `Biểu đồ giá SJC · ${historyPeriods[selectedHistoryDays]}`;
+				loadHistory();
+			});
+		});
 		setRefreshInterval();
 		loadPrice();
+		loadHistory();
 	</script>
 </body>
 </html>
