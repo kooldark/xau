@@ -353,8 +353,8 @@
 				worldPrice.textContent = `$${worldPriceFormatter.format(price)}`;
 				const updated = Number(data.timestamp) ? new Date(Number(data.timestamp) * 1000) : null;
 				worldUpdatedAt.textContent = updated && !Number.isNaN(updated.getTime())
-					? `Cập nhật ${updated.toLocaleTimeString('vi-VN')}`
-					: data.time ? `Cập nhật ${data.time}` : 'Giá trực tiếp';
+					? `Cập nhật ${updated.toLocaleTimeString('vi-VN')} · mỗi 5 phút`
+					: data.time ? `Cập nhật ${data.time} · mỗi 5 phút` : 'Tự cập nhật mỗi 5 phút';
 			} catch (error) {
 				worldPrice.textContent = '--';
 				worldUpdatedAt.textContent = 'Không tải được giá';
@@ -364,7 +364,7 @@
 		function setRefreshInterval() {
 			clearInterval(refreshTimer);
 			const seconds = Number(document.getElementById('interval').value);
-			if (seconds > 0) refreshTimer = setInterval(() => { loadPrice(); loadWorldPrice(); loadHistory(); }, seconds * 1000);
+			if (seconds > 0) refreshTimer = setInterval(() => { loadPrice(); loadHistory(); }, seconds * 1000);
 		}
 
 		refreshButton.addEventListener('click', () => { loadPrice(); loadWorldPrice(); loadHistory(); });
@@ -380,6 +380,7 @@
 		setRefreshInterval();
 		loadPrice();
 		loadWorldPrice();
+		setInterval(loadWorldPrice, 5 * 60 * 1000);
 		loadHistory();
 	</script>
 </body>
