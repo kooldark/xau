@@ -28,10 +28,14 @@
 		}
 		.topline { height: 7px; background: var(--green); }
 		main { width: min(900px, calc(100% - 36px)); margin: 0 auto; padding: 44px 0 64px; }
-		header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 28px; }
+		header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 20px; margin-bottom: 28px; }
 		.eyebrow { color: var(--green); font: 700 13px/1.4 Arial, sans-serif; text-transform: uppercase; }
 		h1 { margin: 8px 0 0; font: 500 48px/1.08 Georgia, "Times New Roman", serif; }
-		.source-link { color: var(--green); font: 600 15px Arial, sans-serif; text-underline-offset: 4px; white-space: nowrap; }
+		.author { margin-top: 10px; color: var(--muted); font: 14px Arial, sans-serif; }
+		.world-quote { min-width: 220px; padding: 12px 16px; border-left: 3px solid var(--gold); background: var(--panel); text-align: right; }
+		.world-label { color: var(--muted); font: 700 12px Arial, sans-serif; text-transform: uppercase; }
+		.world-price { margin-top: 6px; color: var(--green); font: 700 24px/1.2 Georgia, "Times New Roman", serif; }
+		.world-meta { margin-top: 5px; color: var(--muted); font: 12px Arial, sans-serif; }
 		.board { border: 1px solid var(--line); background: var(--panel); }
 		.board-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 22px; border-bottom: 1px solid var(--line); }
 		.product { font: 700 16px Arial, sans-serif; }
@@ -55,6 +59,7 @@
 		.estimate-cell + .estimate-cell { border-left: 1px solid var(--line); }
 		.estimate-discount { color: var(--muted); font: 700 13px Arial, sans-serif; }
 		.estimate-price { margin-top: 7px; color: var(--gold); font: 700 17px/1.3 Arial, sans-serif; overflow-wrap: anywhere; }
+		.history-estimate { margin-top: 16px; padding-top: 17px; border-top: 1px solid var(--line); }
 		.history-section { min-width: 0; margin-top: 24px; padding: 20px 22px 14px; border: 1px solid var(--line); background: var(--panel); }
 		.history-heading { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; }
 		.history-copy { display: grid; gap: 6px; }
@@ -75,22 +80,13 @@
 		button { min-height: 44px; padding: 0 17px; border: 0; background: var(--green); color: white; font: 700 15px Arial, sans-serif; cursor: pointer; }
 		button:hover { background: #12493e; }
 		button:disabled { cursor: wait; opacity: .65; }
-		select, input { min-height: 42px; border: 1px solid var(--line); border-radius: 0; background: var(--panel); color: var(--ink); font: 15px Arial, sans-serif; }
+		select { min-height: 42px; border: 1px solid var(--line); border-radius: 0; background: var(--panel); color: var(--ink); font: 15px Arial, sans-serif; }
 		select { padding: 0 10px; }
-		details { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 18px; }
-		summary { color: var(--green); cursor: pointer; font: 700 15px Arial, sans-serif; }
-		.settings { display: grid; gap: 9px; margin-top: 16px; }
-		.settings label { font: 700 13px Arial, sans-serif; }
-		.endpoint-row { display: flex; gap: 8px; }
-		.endpoint-row input { flex: 1; min-width: 0; padding: 0 11px; }
-		.endpoint-row button { min-height: 42px; padding: 0 13px; }
-		.help { max-width: 720px; margin: 4px 0 0; color: var(--muted); font: 13px/1.6 Arial, sans-serif; }
-		code { color: var(--ink); }
 		@media (max-width: 560px) {
 			main { width: min(100% - 24px, 900px); padding-top: 30px; }
-			header { display: block; }
+			header { grid-template-columns: minmax(0, 1fr); gap: 14px; }
 			h1 { font-size: 34px; }
-			.source-link { display: inline-block; margin-top: 14px; }
+			.world-quote { justify-self: end; min-width: min(220px, 100%); }
 			.board-head, .board-foot { padding-right: 14px; padding-left: 14px; }
 			.price-cell { padding: 22px 14px 24px; }
 			.price { font-size: 22px; }
@@ -102,8 +98,6 @@
 			.range-control { width: 100%; }
 			.range-button { padding: 0 9px; }
 			.chart-wrap { height: 260px; }
-			.endpoint-row { flex-wrap: wrap; }
-			.endpoint-row input { flex-basis: 100%; }
 		}
 	</style>
 </head>
@@ -114,8 +108,13 @@
 			<div>
 				<div class="eyebrow">Thị trường vàng Việt Nam</div>
 				<h1>Vàng miếng SJC</h1>
+				<div class="author">Tác giả: Trần Như Tuấn · 0379031662</div>
 			</div>
-			<a class="source-link" href="https://www.vang.today/vi/api" target="_blank" rel="noopener noreferrer">Nguồn dữ liệu: vang.today ↗</a>
+			<div class="world-quote" aria-live="polite">
+				<div class="world-label">Vàng thế giới · XAU/USD</div>
+				<div class="world-price" id="worldPrice">--</div>
+				<div class="world-meta">USD / oz · <span id="worldUpdatedAt">Đang cập nhật…</span></div>
+			</div>
 		</header>
 
 		<section class="board" aria-label="Giá vàng miếng SJC">
@@ -157,7 +156,6 @@
 			</div>
 			<div class="board-foot">
 				<span id="updatedAt">Chưa có dữ liệu</span>
-				<span id="sourceName">Nguồn: chưa cấu hình</span>
 			</div>
 		</section>
 
@@ -177,6 +175,26 @@
 			<div class="chart-wrap">
 				<canvas id="historyChart" role="img" aria-label="Biểu đồ giá mua vào và bán ra vàng SJC trong 30 ngày"></canvas>
 			</div>
+			<div class="estimate-row history-estimate" aria-live="polite">
+				<div class="estimate-heading">
+					<div class="estimate-title">Giá vàng 99 bán ra dự đoán · VNĐ/chỉ</div>
+					<div class="estimate-basis" id="historyEstimateBasis">Mức trừ tính theo giá SJC mỗi lượng</div>
+				</div>
+				<div class="estimate-grid">
+					<div class="estimate-cell">
+						<div class="estimate-discount">−7.000.000</div>
+						<div class="estimate-price" id="historyEstimate700">--</div>
+					</div>
+					<div class="estimate-cell">
+						<div class="estimate-discount">−7.500.000</div>
+						<div class="estimate-price" id="historyEstimate750">--</div>
+					</div>
+					<div class="estimate-cell">
+						<div class="estimate-discount">−8.000.000</div>
+						<div class="estimate-price" id="historyEstimate800">--</div>
+					</div>
+				</div>
+			</div>
 			<p class="history-message" id="historyMessage" role="status">Đang tải lịch sử giá…</p>
 		</section>
 
@@ -190,37 +208,25 @@
 				<option value="300">Mỗi 5 phút</option>
 			</select>
 		</div>
-
-		<details>
-			<summary>Cấu hình nguồn giá</summary>
-			<div class="settings">
-				<label for="endpoint">Địa chỉ API giá</label>
-				<div class="endpoint-row">
-					<input id="endpoint" type="url" placeholder="https://www.vang.today/api/prices?type=SJL1L10" autocomplete="url">
-					<button id="saveEndpoint" type="button">Lưu endpoint</button>
-				</div>
-				<p class="help">Đang lấy giá SJC 9999 từ vang.today. Trang tự cập nhật mỗi phút; giá vàng 99 là mức tham khảo.</p>
-			</div>
-		</details>
 	</main>
 
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
 	<script>
-		const endpointInput = document.getElementById('endpoint');
 		const refreshButton = document.getElementById('refreshButton');
 		const message = document.getElementById('message');
 		const status = document.getElementById('status');
 		const statusText = document.getElementById('statusText');
 		const formatter = new Intl.NumberFormat('vi-VN');
 		const historyFormatter = new Intl.NumberFormat('vi-VN');
+		const worldPriceFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+		const sjcEndpoint = 'https://www.vang.today/api/prices?type=SJL1L10';
+		const worldGoldEndpoint = 'https://www.vang.today/api/prices?type=XAUUSD';
 		const historyEndpoint = 'https://www.vang.today/api/prices?type=SJL1L10&days=';
 		const historyPeriods = { 7: '7 ngày', 30: '1 tháng', 90: '3 tháng', 365: '1 năm' };
 		let selectedHistoryDays = 30;
 		let refreshTimer;
 		let historyChart;
-
-		const endpointStorageKey = 'sjc-price-endpoint-vang-today';
-		endpointInput.value = localStorage.getItem(endpointStorageKey) || 'https://www.vang.today/api/prices?type=SJL1L10';
+		let historyRecords = [];
 
 		function setStatus(kind, text) {
 			status.className = `status ${kind}`;
@@ -231,6 +237,14 @@
 			const value = Number(data[primary] ?? data[alternate]);
 			if (!Number.isFinite(value) || value <= 0) throw new Error(`Dữ liệu ${primary} không hợp lệ.`);
 			return value;
+		}
+
+		function updateHistoryEstimate(sell, date) {
+			for (const [discount, id] of [[7000000, 'historyEstimate700'], [7500000, 'historyEstimate750'], [8000000, 'historyEstimate800']]) {
+				document.getElementById(id).textContent = formatter.format((sell - discount) / 10);
+			}
+			const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString('vi-VN');
+			document.getElementById('historyEstimateBasis').textContent = `Mức trừ tính theo giá SJC mỗi lượng · ${dateLabel}`;
 		}
 
 		async function loadHistory() {
@@ -248,6 +262,8 @@
 				})).filter(day => day.date && Number.isFinite(day.buy) && Number.isFinite(day.sell));
 				if (!records.length) throw new Error('API chưa có dữ liệu lịch sử SJC.');
 				if (typeof Chart === 'undefined') throw new Error('Không tải được thư viện biểu đồ.');
+				historyRecords = records;
+				updateHistoryEstimate(records[records.length - 1].sell, records[records.length - 1].date);
 
 				const chartData = {
 					labels: records.map(day => new Date(`${day.date}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })),
@@ -260,6 +276,11 @@
 					responsive: true,
 					maintainAspectRatio: false,
 					interaction: { mode: 'index', intersect: false },
+					onHover: (event, activeElements) => {
+						const activePoint = activeElements[0];
+						const record = activePoint && historyRecords[activePoint.index];
+						if (record) updateHistoryEstimate(record.sell, record.date);
+					},
 					plugins: {
 						legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Arial', size: 13 } } },
 						tooltip: { callbacks: { label: context => `${context.dataset.label}: ${historyFormatter.format(context.parsed.y)} đồng/lượng` } }
@@ -285,20 +306,12 @@
 		}
 
 		async function loadPrice() {
-			const endpoint = endpointInput.value.trim();
-			if (!endpoint) {
-				setStatus('error', 'Thiếu endpoint');
-				message.className = 'message error';
-				message.textContent = 'Nhập địa chỉ API trong phần Cấu hình nguồn giá.';
-				return;
-			}
-
 			refreshButton.disabled = true;
 			setStatus('', 'Đang tải');
 			message.className = 'message';
 			message.textContent = 'Đang lấy dữ liệu giá SJC…';
 			try {
-				const response = await fetch(endpoint, { cache: 'no-store', headers: { Accept: 'application/json' } });
+				const response = await fetch(sjcEndpoint, { cache: 'no-store', headers: { Accept: 'application/json' } });
 				if (!response.ok) throw new Error(`Endpoint trả HTTP ${response.status}.`);
 				const data = await response.json();
 				if (data.success === false) throw new Error('API không trả về dữ liệu giá SJC.');
@@ -310,7 +323,6 @@
 				document.getElementById('estimate700').textContent = formatter.format((sell - 7000000) / 10);
 				document.getElementById('estimate750').textContent = formatter.format((sell - 7500000) / 10);
 				document.getElementById('estimate800').textContent = formatter.format((sell - 8000000) / 10);
-				document.getElementById('sourceName').textContent = `Nguồn: vang.today${data.name ? ` · ${data.name}` : ''}`;
 				const updated = data.updatedAt ? new Date(data.updatedAt) : null;
 				const updatedLabel = updated && !Number.isNaN(updated.getTime())
 					? updated.toLocaleString('vi-VN')
@@ -329,19 +341,33 @@
 			}
 		}
 
+		async function loadWorldPrice() {
+			const worldPrice = document.getElementById('worldPrice');
+			const worldUpdatedAt = document.getElementById('worldUpdatedAt');
+			try {
+				const response = await fetch(worldGoldEndpoint, { cache: 'no-store', headers: { Accept: 'application/json' } });
+				if (!response.ok) throw new Error(`API trả HTTP ${response.status}.`);
+				const data = await response.json();
+				if (data.success === false) throw new Error('API không trả về giá vàng thế giới.');
+				const price = parsePrice(data, 'buy', 'price');
+				worldPrice.textContent = `$${worldPriceFormatter.format(price)}`;
+				const updated = Number(data.timestamp) ? new Date(Number(data.timestamp) * 1000) : null;
+				worldUpdatedAt.textContent = updated && !Number.isNaN(updated.getTime())
+					? `Cập nhật ${updated.toLocaleTimeString('vi-VN')}`
+					: data.time ? `Cập nhật ${data.time}` : 'Giá trực tiếp';
+			} catch (error) {
+				worldPrice.textContent = '--';
+				worldUpdatedAt.textContent = 'Không tải được giá';
+			}
+		}
+
 		function setRefreshInterval() {
 			clearInterval(refreshTimer);
 			const seconds = Number(document.getElementById('interval').value);
-			if (seconds > 0) refreshTimer = setInterval(() => { loadPrice(); loadHistory(); }, seconds * 1000);
+			if (seconds > 0) refreshTimer = setInterval(() => { loadPrice(); loadWorldPrice(); loadHistory(); }, seconds * 1000);
 		}
 
-		document.getElementById('saveEndpoint').addEventListener('click', () => {
-			const endpoint = endpointInput.value.trim();
-			if (!endpoint) return;
-			localStorage.setItem(endpointStorageKey, endpoint);
-			loadPrice();
-		});
-		refreshButton.addEventListener('click', () => { loadPrice(); loadHistory(); });
+		refreshButton.addEventListener('click', () => { loadPrice(); loadWorldPrice(); loadHistory(); });
 		document.getElementById('interval').addEventListener('change', setRefreshInterval);
 		document.querySelectorAll('.range-button').forEach(button => {
 			button.addEventListener('click', () => {
@@ -353,6 +379,7 @@
 		});
 		setRefreshInterval();
 		loadPrice();
+		loadWorldPrice();
 		loadHistory();
 	</script>
 </body>
