@@ -417,8 +417,8 @@
 		<section class="history-section" aria-labelledby="historyTitle">
 			<div class="history-heading">
 				<div class="history-copy">
-					<h2 class="history-title" id="historyTitle">Biểu đồ giá SJC · 1 tháng</h2>
-					<div class="history-subtitle">Đồng/lượng · Mua vào và bán ra</div>
+					<h2 class="history-title" id="historyTitle">Biểu đồ giá SJC &amp; vàng thế giới · 1 tháng</h2>
+					<div class="history-subtitle">SJC bán ra · VNĐ/lượng &amp; vàng thế giới · USD/oz</div>
 				</div>
 				<div class="range-control" role="group" aria-label="Khoảng thời gian biểu đồ">
 					<button class="range-button" type="button" data-days="7" aria-pressed="false">7 ngày</button>
@@ -428,7 +428,7 @@
 				</div>
 			</div>
 			<div class="chart-wrap">
-				<canvas id="historyChart" role="img" aria-label="Biểu đồ giá mua vào và bán ra vàng SJC trong 30 ngày"></canvas>
+				<canvas id="historyChart" role="img" aria-label="Biểu đồ giá bán ra SJC và vàng thế giới trong 30 ngày"></canvas>
 			</div>
 			<div class="estimate-row history-estimate" aria-live="polite">
 				<div class="estimate-heading">
@@ -473,6 +473,7 @@
 		const sjcEndpoint = 'https://www.vang.today/api/prices?type=SJL1L10';
 		const worldGoldEndpoint = 'https://www.vang.today/api/prices?type=XAUUSD';
 		const historyEndpoint = 'https://www.vang.today/api/prices?type=SJL1L10&days=';
+		const worldGoldHistoryEndpoint = 'https://www.vang.today/api/prices?type=XAUUSD&days=';
 		const historyPeriods = { 7: '7 ngày', 30: '1 tháng', 90: '3 tháng', 365: '1 năm' };
 		let selectedHistoryDays = 30;
 		let refreshTimer;
@@ -536,25 +537,46 @@
 			const historyMessage = document.getElementById('historyMessage');
 			historyMessage.className = 'history-message';
 			try {
-				const response = await fetch(`${historyEndpoint}${selectedHistoryDays}`, { cache: 'no-store', headers: { Accept: 'application/json' } });
-				if (!response.ok) throw new Error(`API lịch sử trả HTTP ${response.status}.`);
-				const data = await response.json();
-				const history = Array.isArray(data.history) ? data.history.slice().reverse() : [];
-				const records = history.map(day => ({
+				const headers = { Accept: 'application/json' };
+				const [sjcResponse, worldResponse] = await Promise.all([
+					fetch(`${historyEndpoint}${selectedHistoryDays}`, { cache: 'no-store', headers }),
+					fetch(`${worldGoldHistoryEndpoint}${selectedHistoryDays}`, { cache: 'no-store', headers })
+				]);
+				if (!sjcResponse.ok) throw new Error(`API lịch sử SJC trả HTTP ${sjcResponse.status}.`);
+				if (!worldResponse.ok) throw new Error(`API lịch sử vàng thế giới trả HTTP ${worldResponse.status}.`);
+				const [sjcData, worldData] = await Promise.all([sjcResponse.json(), worldResponse.json()]);
+				if (sjcData.success === false) throw new Error('API không trả về lịch sử giá SJC.');
+				if (worldData.success === false) throw new Error('API không trả về lịch sử giá vàng thế giới.');
+				const sjcHistory = Array.isArray(sjcData.history) ? sjcData.history.slice().reverse() : [];
+				const worldHistory = Array.isArray(worldData.history) ? worldData.history.slice().reverse() : [];
+				const sjcRecords = sjcHistory.map(day => ({
 					date: day.date,
-					buy: Number(day.prices?.SJL1L10?.buy),
 					sell: Number(day.prices?.SJL1L10?.sell)
-				})).filter(day => day.date && Number.isFinite(day.buy) && Number.isFinite(day.sell));
-				if (!records.length) throw new Error('API chưa có dữ liệu lịch sử SJC.');
+				})).filter(day => day.date && Number.isFinite(day.sell) && day.sell > 0);
+				const worldRecords = worldHistory.map(day => ({
+					date: day.date,
+					world: Number(day.prices?.XAUUSD?.buy)
+				})).filter(day => day.date && Number.isFinite(day.world) && day.world > 0);
+				if (!sjcRecords.length) throw new Error('API chưa có dữ liệu lịch sử SJC.');
+				if (!worldRecords.length) throw new Error('API chưa có dữ liệu lịch sử vàng thế giới.');
+				const recordsByDate = new Map();
+				for (const day of sjcRecords) recordsByDate.set(day.date, { date: day.date, sell: day.sell, world: null });
+				for (const day of worldRecords) {
+					const record = recordsByDate.get(day.date) || { date: day.date, sell: null, world: null };
+					record.world = day.world;
+					recordsByDate.set(day.date, record);
+				}
+				const records = [...recordsByDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 				if (typeof Chart === 'undefined') throw new Error('Không tải được thư viện biểu đồ.');
 				historyRecords = records;
-				updateHistoryEstimate(records[records.length - 1].sell, records[records.length - 1].date);
+				const latestSjcRecord = sjcRecords[sjcRecords.length - 1];
+				updateHistoryEstimate(latestSjcRecord.sell, latestSjcRecord.date);
 
 				const chartData = {
 					labels: records.map(day => new Date(`${day.date}T00:00:00`).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })),
 					datasets: [
-						{ label: 'Mua vào', data: records.map(day => day.buy), borderColor: '#1b5c4f', backgroundColor: '#1b5c4f', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25 },
-						{ label: 'Bán ra', data: records.map(day => day.sell), borderColor: '#bd8c2c', backgroundColor: '#bd8c2c', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25 }
+						{ label: 'SJC bán ra', data: records.map(day => day.sell), yAxisID: 'sjc', borderColor: '#bd8c2c', backgroundColor: '#bd8c2c', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25 },
+						{ label: 'Vàng thế giới (XAU/USD)', data: records.map(day => day.world), yAxisID: 'world', borderColor: '#1b5c4f', backgroundColor: '#1b5c4f', borderWidth: 2, pointRadius: 2, pointHoverRadius: 5, tension: 0.25 }
 					]
 				};
 				const chartOptions = {
@@ -564,15 +586,18 @@
 					onHover: (event, activeElements) => {
 						const activePoint = activeElements[0];
 						const record = activePoint && historyRecords[activePoint.index];
-						if (record) updateHistoryEstimate(record.sell, record.date);
+						if (record && Number.isFinite(record.sell)) updateHistoryEstimate(record.sell, record.date);
 					},
 					plugins: {
 						legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Arial', size: 13 } } },
-						tooltip: { callbacks: { label: context => `${context.dataset.label}: ${historyFormatter.format(context.parsed.y)} đồng/lượng` } }
+						tooltip: { callbacks: { label: context => context.dataset.yAxisID === 'world'
+							? `${context.dataset.label}: $${worldPriceFormatter.format(context.parsed.y)} USD/oz`
+							: `${context.dataset.label}: ${historyFormatter.format(context.parsed.y)} đồng/lượng` } }
 					},
 					scales: {
 						x: { grid: { display: false }, ticks: { maxTicksLimit: 8, maxRotation: 0 } },
-						y: { beginAtZero: false, ticks: { callback: value => `${(value / 1000000).toLocaleString('vi-VN')} tr` } }
+						sjc: { type: 'linear', position: 'left', beginAtZero: false, title: { display: true, text: 'VNĐ/lượng' }, ticks: { callback: value => `${(value / 1000000).toLocaleString('vi-VN')} tr` } },
+						world: { type: 'linear', position: 'right', beginAtZero: false, title: { display: true, text: 'USD/oz' }, grid: { drawOnChartArea: false }, ticks: { callback: value => `$${value}` } }
 					}
 				};
 
@@ -668,7 +693,8 @@
 			button.addEventListener('click', () => {
 				selectedHistoryDays = Number(button.dataset.days);
 				document.querySelectorAll('.range-button').forEach(option => option.setAttribute('aria-pressed', String(option === button)));
-				document.getElementById('historyTitle').textContent = `Biểu đồ giá SJC · ${historyPeriods[selectedHistoryDays]}`;
+				document.getElementById('historyTitle').textContent = `Biểu đồ giá SJC & vàng thế giới · ${historyPeriods[selectedHistoryDays]}`;
+				document.getElementById('historyChart').setAttribute('aria-label', `Biểu đồ giá bán ra SJC và vàng thế giới trong ${historyPeriods[selectedHistoryDays]}`);
 				loadHistory();
 			});
 		});
